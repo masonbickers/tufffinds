@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./coming-soon.module.css";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 export default function ComingSoonPage() {
   const [email, setEmail] = useState("");
