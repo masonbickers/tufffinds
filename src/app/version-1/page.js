@@ -1,6 +1,8 @@
+// src/app/version-1/page.js
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Manrope } from "next/font/google";
 import "../version-1.css";
 import Footer from "../_components/footer";
@@ -90,7 +92,7 @@ export default function VersionOnePage() {
         aria-labelledby="sidebar-title"
       >
         <div className="sidebar-head">
-          <img src="/CHANEL.png" alt="Logo" className="logo" />
+          <Image src="/CHANEL.png" alt="Logo" className="logo" width={120} height={28} priority />
           <h2 id="sidebar-title" className="sr-only">Site menu</h2>
           <button className="close-x" aria-label="Close menu" onClick={() => setMenuOpen(false)}>×</button>
         </div>
@@ -113,12 +115,13 @@ export default function VersionOnePage() {
       <section id="home" className="hero hero--lift">
         <div className="wrap">
           <h1 className="hero-title reveal">
-            <img
+            <Image
               src="/icon.png"
               alt="Opening Line"
               className="hero-logo"
-              decoding="async"
-              loading="eager"
+              width={96}
+              height={96}
+              priority
             />
           </h1>
         </div>
@@ -173,12 +176,16 @@ export default function VersionOnePage() {
         <div className="wrap">
           <div className="founders">
             <figure className="f-photo reveal">
-              <img
-                src="/tufffinds-shoot.jpg"
-                alt="Gina & Ginevra — Tufffinds founders"
-                loading="lazy"
-                decoding="async"
-              />
+              <div style={{ position: "relative", width: "100%", aspectRatio: "4/3" }}>
+                <Image
+                  src="/tufffinds-shoot.jpg"
+                  alt="Gina & Ginevra — Tufffinds founders"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                  loading="lazy"
+                />
+              </div>
             </figure>
             <div className="f-copy reveal">
               <h2 className="eyebrow">Meet our founders,</h2>

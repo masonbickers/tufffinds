@@ -1,3 +1,4 @@
+// src/app/link/page.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -24,7 +25,9 @@ function readAssignmentCookie(): string | null {
 
 /** Write the assigned key into the cookie (sticky ~180 days) */
 function writeAssignmentCookie(key: string) {
-  document.cookie = `wa_affinity=${encodeURIComponent(key)}; Max-Age=${60 * 60 * 24 * 180}; Path=/; SameSite=Lax`;
+  document.cookie = `wa_affinity=${encodeURIComponent(
+    key
+  )}; Max-Age=${60 * 60 * 24 * 180}; Path=/; SameSite=Lax`;
 }
 
 /** Clear the assignment cookie (for testing) */
@@ -36,9 +39,10 @@ function clearAssignmentCookie() {
 function getCycledTarget(pool: WaTarget[]): WaTarget {
   const k = "wa_cycle_idx";
   const n = pool.length;
-  let idx = Number(localStorage.getItem(k) ?? "0") || 0;
+  const idx = Number(localStorage.getItem(k) ?? "0") || 0; // const ✅
   const picked = pool[idx % n];
-  localStorage.setItem(k, String((idx + 1) % n));
+  const nextIdx = (idx + 1) % n;
+  localStorage.setItem(k, String(nextIdx));
   return picked;
 }
 
@@ -71,7 +75,9 @@ export default function LinkRotator() {
     if (!target) {
       const assignedKey = readAssignmentCookie();
       if (assignedKey) {
-        target = WHATSAPP_POOL.find((t) => t.key.toLowerCase() === assignedKey.toLowerCase());
+        target = WHATSAPP_POOL.find(
+          (t) => t.key.toLowerCase() === assignedKey.toLowerCase()
+        );
       }
       if (!target) {
         // First time on this device: weighted random, then store the key
@@ -85,8 +91,12 @@ export default function LinkRotator() {
     if (!target) target = WHATSAPP_POOL[0];
 
     const msg = (textOverride || target.text || "").trim();
-    const web = `https://wa.me/${target.number}${msg ? `?text=${encodeURIComponent(msg)}` : ""}`;
-    const deep = `whatsapp://send?phone=${target.number}${msg ? `&text=${encodeURIComponent(msg)}` : ""}`;
+    const web = `https://wa.me/${target.number}${
+      msg ? `?text=${encodeURIComponent(msg)}` : ""
+    }`;
+    const deep = `whatsapp://send?phone=${target.number}${
+      msg ? `&text=${encodeURIComponent(msg)}` : ""
+    }`;
 
     // Try the app first, then fallback to Web
     window.location.href = deep;
@@ -97,15 +107,17 @@ export default function LinkRotator() {
   }, [query]);
 
   return (
-    <main style={{
-      display: "flex",
-      minHeight: "100dvh",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "#000",
-      color: "#9ca3af",
-      fontFamily: "system-ui,-apple-system,Segoe UI,Roboto"
-    }}>
+    <main
+      style={{
+        display: "flex",
+        minHeight: "100dvh",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#000",
+        color: "#9ca3af",
+        fontFamily: "system-ui,-apple-system,Segoe UI,Roboto",
+      }}
+    >
       Opening WhatsApp…
     </main>
   );

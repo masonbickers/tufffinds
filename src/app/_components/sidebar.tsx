@@ -1,6 +1,7 @@
-// components/Sidebar.tsx
+// src/app/_components/sidebar.tsx
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, CSSProperties } from "react";
+import Image from "next/image";
 
 export type SidebarLink = {
   label: string;
@@ -16,9 +17,12 @@ type SidebarProps = {
   instagramUrl?: string;
   email?: string;
   /** Override colours if you like */
-  bg?: string;     // panel background
-  ink?: string;    // text colour
+  bg?: string; // panel background
+  ink?: string; // text colour
 };
+
+type PanelStyle = CSSProperties & { ["--bg"]?: string; ["--ink"]?: string };
+type LinkStyle = CSSProperties & { ["--i"]?: number };
 
 export default function Sidebar({
   open,
@@ -54,6 +58,9 @@ export default function Sidebar({
     return () => root.classList.remove("menu-open");
   }, [open]);
 
+  const panelStyle: PanelStyle = { "--bg": bg, "--ink": ink };
+  const linkStyle = (i: number): LinkStyle => ({ "--i": i });
+
   return (
     <>
       {/* Overlay */}
@@ -66,21 +73,22 @@ export default function Sidebar({
 
       {/* Sidebar */}
       <aside
-        ref={sidebarRef as any}
+        ref={sidebarRef}
         className="sidebar"
         data-state={open ? "open" : "closed"}
         aria-hidden={!open}
         aria-labelledby="sidebar-title"
-        style={
-          {
-            // CSS vars for quick theming
-            "--bg": bg,
-            "--ink": ink,
-          } as React.CSSProperties
-        }
+        style={panelStyle}
       >
         <div className="sidebar-header">
-          <img src={logoSrc} alt="Logo" className="sidebar-logo" />
+          <Image
+            src={logoSrc}
+            alt="Logo"
+            width={120}
+            height={28}
+            className="sidebar-logo"
+            priority
+          />
           <h2 id="sidebar-title" className="sr-only">
             Site menu
           </h2>
@@ -97,7 +105,7 @@ export default function Sidebar({
               href={link.href}
               onClick={onClose}
               className={link.cta ? "btn" : ""}
-              style={{ ["--i" as any]: i }}
+              style={linkStyle(i)}
             >
               {link.label}
             </a>
@@ -267,7 +275,6 @@ export default function Sidebar({
           text-decoration: underline;
         }
 
-        /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
           .overlay,
           .sidebar,

@@ -1,4 +1,9 @@
-// app/components/SectionBreak.tsx
+// src/app/components/sectionbreak.tsx
+"use client";
+
+import { CSSProperties, useState } from "react";
+import Image from "next/image";
+
 type Props = {
   /** Space above/below the break (px). Default: 8 */
   gap?: number;
@@ -8,7 +13,7 @@ type Props = {
   repeat?: boolean;
   /** Optional custom image path. Default: "/line.png" (put this in /public) */
   src?: string;
-  /** Fallback color if no image (only used when repeat=false and src missing) */
+  /** Fallback colour if no image (only used when repeat=false and src missing) */
   color?: string;
 };
 
@@ -19,7 +24,7 @@ export default function SectionBreak({
   src = "/line.png",
   color = "var(--line)",
 }: Props) {
-  const baseStyle: React.CSSProperties = {
+  const baseStyle: CSSProperties = {
     margin: `${gap}px 0`,
     lineHeight: 0,
   };
@@ -41,33 +46,55 @@ export default function SectionBreak({
     );
   }
 
-  // Single centered image (fallback to a solid line if image not found)
+  // Single centered image with graceful fallback
+  return <SingleLine src={src} height={height} color={color} baseStyle={baseStyle} />;
+}
+
+function SingleLine({
+  src,
+  height,
+  color,
+  baseStyle,
+}: {
+  src: string;
+  height: number;
+  color: string;
+  baseStyle: CSSProperties;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    // Fallback: simple centred rounded line
+    return (
+      <div role="separator" aria-hidden="true" style={baseStyle}>
+        <div
+          style={{
+            height,
+            background: color,
+            borderRadius: 999,
+            maxWidth: 600,
+            margin: "0 auto",
+            opacity: 0.65,
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Use a fixed-height, relative box and let the image scale to fit (no layout shift)
   return (
     <div role="separator" aria-hidden="true" style={baseStyle}>
-      <img
-        src={src}
-        alt=""
-        onError={(e) => {
-          // fallback: simple line
-          (e.currentTarget.style as any).display = "none";
-          const parent = e.currentTarget.parentElement;
-          if (parent) {
-            parent.style.height = `${height}px`;
-            parent.style.background = color;
-            parent.style.borderRadius = "999px";
-            parent.style.maxWidth = "600px";
-            parent.style.marginLeft = "auto";
-            parent.style.marginRight = "auto";
-            parent.style.opacity = "0.65";
-          }
-        }}
-        style={{
-          display: "block",
-          margin: "0 auto",
-          height,
-          width: "auto",
-        }}
-      />
+      <div style={{ position: "relative", height, width: "100%" }}>
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes="100vw"
+          style={{ objectFit: "contain", objectPosition: "center" }}
+          onError={() => setFailed(true)}
+          priority={false}
+        />
+      </div>
     </div>
   );
 }
