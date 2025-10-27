@@ -129,16 +129,15 @@ export default function ComingSoonPage() {
       <div className={styles.csInner}>
         <div className={styles.logoWrap}>
           <Image
-            src="/logo-04.png"              /* high-res PNG or SVG in /public */
+            src="/finallogobrown.png"              /* high-res PNG or SVG in /public */
             alt="Logo"
             fill
-            sizes="(max-width: 640px) 75vw, 460px"
+            sizes="(max-width: 940px) 75vw, 460px"
             priority
             className={styles.logoImg}
           />
         </div>
 
-        <h1 className={styles.title}>Coming Soon</h1>
         <p className={styles.sub}>We’re nearly ready. Join the waitlist to be first in.</p>
 
         <form onSubmit={onSubmit} className={styles.form}>

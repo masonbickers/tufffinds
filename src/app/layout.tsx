@@ -22,16 +22,16 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Bickers Personal Shopping",
+  title: "Tufffinds - The Ones Connected",
   description:
     "Effortless style, tailored to you — wardrobe edits, event styling, and capsule collections.",
   metadataBase: new URL("http://localhost:3000"), // update when deployed
   openGraph: {
-    title: "Bickers Personal Shopping",
+    title: "Tufffinds - The Ones Connected",
     description:
       "Effortless style, tailored to you — wardrobe edits, event styling, and capsule collections.",
     url: "/",
-    siteName: "Bickers",
+    siteName: "Tufffinds",
     images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
   },
   icons: {
@@ -57,3 +57,4 @@ export default function RootLayout({
     </html>
   );
 }
+
