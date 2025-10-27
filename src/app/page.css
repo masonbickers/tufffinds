@@ -1,0 +1,1225 @@
+:root{
+  /* Light palette */
+  --bg:#f8f7f4;
+  --bg-alt:#f2f1ee;
+  --fg:#1a1b1d;
+  --muted:#6f7177;
+  --line:#e7e4de;
+  --accent:#2f3033;
+
+  /* Rhythm & sizing */
+  --space-section: clamp(80px, 10vw, 140px);
+  --space-grid: 28px;
+  --radius: 16px;
+  --radius-lg: 22px;
+
+  /* Type scale */
+  --fs-h1: clamp(2.4rem, 4.8vw, 4.2rem);
+  --fs-h2: clamp(1.6rem, 2.8vw, 2.4rem);
+  --fs-h3: clamp(1.1rem, 1.6vw, 1.25rem);
+
+  /* Motion */
+  --easing: cubic-bezier(.2,.6,.2,1);
+  --reveal: .7s var(--easing);
+
+  /* New: fine-tuned durations & easings */
+  --dur-1: 180ms;
+  --dur-2: 260ms;
+  --dur-3: 420ms;
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --ease-spring: cubic-bezier(.16,1,.3,1);
+
+  --header-h: clamp(56px, 7vw, 72px);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--fg); background:var(--bg);
+  font:16px/1.75 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+
+/* Lock scroll when menu open */
+html.menu-open, body.menu-open { overflow: hidden; }
+
+/* =========================
+   Header (transparent -> glass)
+   ========================= */
+.site-header{
+  position:fixed; inset-inline:0; top:0;
+  height: var(--header-h);
+  z-index:1001;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px;
+  background:transparent;
+  border-bottom:1px solid transparent;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    backdrop-filter var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out),
+    opacity var(--dur-3) var(--ease-out);
+  will-change: background-color, backdrop-filter, box-shadow, transform, opacity;
+}
+
+/* initial fade slide from scroll-reveal */
+.site-header[data-anim="fade"] { opacity:0; transform: translateY(-8px); }
+.site-header[data-anim="fade"][data-in="true"] { opacity:1; transform:none; }
+
+.site-header[data-state="top"]{
+  background: linear-gradient(to bottom, rgba(255,255,255,.78), rgba(255,255,255,0));
+  border-bottom-color: rgba(0,0,0,.06);
+  box-shadow:none;
+}
+.site-header[data-state="scrolled"]{
+  background: color-mix(in oklab, #ffffff 78%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom-color: var(--line);
+  box-shadow:0 6px 22px rgba(0,0,0,.06);
+}
+
+.logo-img{height:30px; width:auto; display:block}
+.site-header[data-state="top"] .hamburger{
+  border-color: rgba(0,0,0,.28);
+  background: rgba(255,255,255,.55);
+}
+.site-header[data-state="top"] .hamburger span{ background:#1a1b1d; }
+.site-header[data-state="top"] .logo-img{ filter: drop-shadow(0 1px 4px rgba(0,0,0,.08)); }
+
+/* =========================
+   Hamburger
+   ========================= */
+.hamburger{
+  position: relative;
+  width:42px; height:42px;
+  display:grid; place-items:center;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.18);
+  border-radius:12px;
+  cursor:pointer;
+  transition: transform var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
+}
+.hamburger:hover { transform: translateY(-1px); }
+.hamburger span{
+  position:absolute; width:18px; height:2px; background:#111; border-radius:2px;
+  transition: transform var(--dur-2) var(--ease-spring), opacity var(--dur-2) var(--ease-out), width var(--dur-2) var(--ease-out);
+}
+.hamburger span:nth-child(1){ transform: translateY(-6px); }
+.hamburger span:nth-child(2){ transform: translateY(0); width:22px; }
+.hamburger span:nth-child(3){ transform: translateY(6px); width:14px; }
+
+.hamburger[data-state="open"] span:nth-child(1){ transform: rotate(45deg); width:22px; }
+.hamburger[data-state="open"] span:nth-child(2){ opacity:0; }
+.hamburger[data-state="open"] span:nth-child(3){ transform: rotate(-45deg); width:22px; }
+
+/* =========================
+   Overlay + Sidebar
+/* ===== Overlay (uses your data-state) ===== */
+.overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.45);
+  backdrop-filter: blur(2px);
+  opacity:0; pointer-events:none;
+  transition: opacity .28s var(--easing);
+  z-index:1000;
+}
+.overlay[data-state="show"]{ opacity:1; pointer-events:auto }
+
+/* ===== Sidebar panel ===== */
+.sidebar{
+  position:fixed; top:0; right:0; height:100%;
+  width:min(86vw, 420px);
+  /* glassy, warm light theme */
+  background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.92));
+  backdrop-filter: blur(16px) saturate(1.06);
+  border-left:1px solid var(--line);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  box-shadow: -24px 0 60px rgba(0,0,0,.10);
+  transform: translateX(100%);
+  transition: transform .32s var(--easing);
+  z-index:1001;
+  display:flex; flex-direction:column;
+  overflow: hidden; /* hide rounded corner overflow */
+}
+.sidebar[data-state="open"]{ transform: translateX(0) }
+
+/* ===== Header row inside panel ===== */
+.sidebar-header{
+  position: sticky; top: 0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 18px 12px 18px;
+  background: inherit; /* keep glass at top when scrolling */
+  border-bottom: 1px solid var(--line);
+  z-index:1;
+}
+.sidebar-logo{ height:32px; width:auto }
+.close-x{
+  border:1px solid transparent;
+  background: transparent;
+  color: var(--fg);
+  font-size: 22px; line-height:1;
+  border-radius: 12px;
+  padding: 6px 10px; cursor:pointer;
+  transition: background .2s ease, border-color .2s ease;
+}
+.close-x:hover{ background:#fff; border-color: var(--line) }
+
+/* ===== Links (staggered reveal with --i you already set) ===== */
+.sidebar-links{
+  padding: 14px 18px 10px 18px;
+  display:flex; flex-direction:column; gap:10px;
+  overflow:auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d7d4cf transparent;
+}
+.sidebar-links::before{
+  content:"Menu";
+  display:block; color: var(--muted);
+  font-size:.85rem; letter-spacing:.12em;
+  text-transform:uppercase; margin:4px 2px 6px;
+}
+
+.sidebar-links a{
+  display:flex; align-items:center; justify-content:space-between;
+  color: var(--fg); text-decoration:none;
+  font-weight:600; letter-spacing:.01em;
+  padding: 14px 12px; border-radius: 14px;
+  border:1px solid transparent;
+  background: transparent;
+  transform: translateX(12px); opacity: 0;
+  transition: transform .45s var(--easing),
+             opacity .45s var(--easing),
+             background .18s ease,
+             border-color .18s ease,
+             box-shadow .18s ease;
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.sidebar[data-state="open"] .sidebar-links a{
+  transform: none; opacity: 1;
+}
+.sidebar-links a:hover{
+  background:#fff;
+  border-color: var(--line);
+  box-shadow: 0 8px 22px rgba(0,0,0,.06);
+}
+/* subtle arrow on items (not on CTA button) */
+.sidebar-links a:not(.btn)::after{
+  content:"›";
+  opacity:.35; transform: translateX(0);
+  transition: transform .18s ease, opacity .18s ease;
+}
+.sidebar-links a:hover:not(.btn)::after{ transform: translateX(2px); opacity:.6 }
+
+/* CTA button inside list spans full width */
+.sidebar-links .btn{
+  display:block; text-align:center;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--accent); color:#fff; border:0;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+}
+.sidebar-links .btn:hover{ filter: brightness(.96) }
+
+/* ===== Footer block ===== */
+.sidebar-footer{
+  margin-top:auto;
+  padding: 14px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0));
+  display:flex; gap:14px; flex-wrap:wrap;
+}
+.sidebar-footer a{
+  color: var(--muted); text-decoration:none;
+  padding: 8px 10px; border-radius: 10px;
+  transition: background .18s ease, color .18s ease;
+}
+.sidebar-footer a:hover{ background:#fff; color: var(--fg) }
+
+
+/* =========================
+   Buttons
+   ========================= */
+.btn{
+  display:inline-block; padding:12px 18px; border-radius:14px; border:0;
+  background:var(--accent); color:#fff; text-decoration:none; font-weight:700; letter-spacing:.02em; cursor:pointer;
+  transition: transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out), opacity var(--dur-1) var(--ease-out);
+  will-change: transform, box-shadow;
+}
+.btn:hover{ transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
+.btn-outline{
+  background:transparent; border:1px solid var(--line); color:var(--fg)
+}
+
+/* =========================
+   Hero
+   ========================= */
+.hero{
+  position:relative; display:grid; align-items:end;
+  min-height: calc(var(--vh, 1vh) * 100);
+  padding-bottom:calc(var(--space-section)/2);
+  scroll-margin-top: calc(var(--header-h) + 12px);
+}
+@supports (height: 100svh) { .hero{ min-height: 100svh; } }
+@supports (height: 100dvh) { .hero{ min-height: 100dvh; } }
+
+.hero-media{
+  --parallax:0; position:absolute; inset:0; overflow:hidden;
+}
+.hero-media img,.hero-media video{
+  width:100%; height:100%; object-fit:cover; display:block; filter:saturate(.95);
+  transform: translate3d(0, calc(var(--parallax)*1px), 0) scale(1.02);
+  will-change: transform; transition: transform 120ms linear;
+}
+.hero-vignette{
+  position:absolute; inset:0;
+  background:radial-gradient(80% 60% at 50% 60%, rgba(255,255,255,.0) 0%, rgba(255,255,255,.55) 60%, rgba(255,255,255,.9) 100%);
+}
+.hero-inner{ position:relative; z-index:1; padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
+.eyebrow{letter-spacing:.18em; font-size:.78rem; color:var(--muted)}
+.hero h1{font-size:var(--fs-h1); line-height:1.05; margin:.4rem 0 .75rem; letter-spacing:.005em}
+.lead{color:var(--muted); max-width:60ch; margin:0 0 1.1rem}
+
+/* =========================
+   Sections
+   ========================= */
+.section{padding:var(--space-section) 20px; scroll-margin-top: calc(var(--header-h) + 12px);}
+.section.alt{background:var(--bg-alt)}
+.container{max-width:1200px; margin:0 auto}
+.narrow{max-width:900px}
+
+/* =========================
+   Cards
+   ========================= */
+.cards{display:grid; gap:var(--space-grid); grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); margin-top:22px}
+.card{
+  border:1px solid var(--line); border-radius:var(--radius);
+  background:#ffffff; padding:22px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.04);
+}
+.card h3{font-size:var(--fs-h3); letter-spacing:.01em; margin:.25rem 0 .25rem}
+
+/* Services list chips */
+.points{display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 0; padding:0; list-style:none}
+.points li{
+  border:1px solid var(--line); padding:7px 12px; border-radius:999px;
+  background:#f6f4ef; color:var(--fg); font-size:.92rem;
+}
+
+/* =========================
+   Process steps
+   ========================= */
+.steps{display:grid; gap:16px; margin-top:16px}
+.step{
+  display:grid; grid-template-columns:48px 1fr; gap:14px; align-items:start;
+  border:1px solid var(--line); background:#ffffff; padding:16px; border-radius:var(--radius);
+  box-shadow: 0 6px 18px rgba(0,0,0,.04);
+}
+.step-num{display:grid; place-items:center; width:48px; height:48px; border-radius:50%; background:#f6f4ef; border:1px solid var(--line); font-weight:700}
+
+/* =========================
+   Testimonials
+   ========================= */
+.quotes{display:grid; gap:16px; margin-top:16px}
+.quote{
+  border:1px solid var(--line); border-radius:var(--radius);
+  background:#ffffff; padding:20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.04);
+}
+.quote cite{display:block; color:var(--muted); margin-top:6px; font-style:normal}
+
+/* =========================
+   CTA strip
+   ========================= */
+.cta-strip{
+  background-image:linear-gradient(135deg, rgba(0,0,0,.03), rgba(0,0,0,0));
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cta-inner{display:flex; align-items:center; justify-content:space-between; gap:18px; padding:calc(var(--space-section)/2) 0}
+@media (max-width:720px){.cta-inner{flex-direction:column; align-items:flex-start}}
+
+/* =========================
+   Contact
+   ========================= */
+.contact-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px}
+.contact-grid textarea{grid-column:1 / -1}
+.contact-grid input, .contact-grid textarea{
+  padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:#fff; color:var(--fg)
+}
+@media (max-width:720px){.contact-grid{grid-template-columns:1fr}}
+
+/* =========================
+   Looks grid
+   ========================= */
+.ig-grid{display:grid; gap:12px; grid-template-columns:repeat(6,1fr)}
+.ig-grid img{width:100%; height:170px; object-fit:cover; border-radius:14px}
+@media (max-width:1100px){.ig-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:640px){.ig-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* =========================
+   Back to top (animated show/hide)
+   ========================= */
+.to-top{
+  position:fixed; right:20px; bottom:20px; width:46px; height:46px;
+  display:grid; place-items:center;
+  border-radius:50%; border:0;
+  background:var(--accent); color:#fff;
+  box-shadow:0 6px 22px rgba(0,0,0,.12);
+  opacity:0; transform: scale(.9);
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+  z-index: 55;
+  pointer-events: none;
+}
+#toTop[data-visible="true"]{ opacity:1; transform: scale(1); pointer-events: auto; }
+
+/* =========================
+   Footer
+   ========================= */
+.footer{
+  padding:calc(var(--space-section)/2) 20px;
+  border-top:1px solid var(--line);
+  background:var(--bg-alt);
+}
+
+/* =========================
+   Scroll-reveal (motion safe)
+   ========================= */
+@media (prefers-reduced-motion: no-preference){
+  [data-anim]{opacity:0; transform:translateY(18px); transition:opacity var(--reveal), transform var(--reveal); will-change:opacity,transform}
+  [data-anim][data-in="true"]{opacity:1; transform:none}
+  [data-anim="up"]{transform:translateY(26px)}
+  [data-anim="left"]{transform:translateX(-30px)}
+  [data-anim="right"]{transform:translateX(30px)}
+  [data-anim="fade"]{transform:none}
+  h1[data-anim], h2[data-anim]{transition-duration:.8s}
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* Show desktop nav at ≥900px (if added later) */
+.desktop-nav{display:none}
+@media (min-width:900px){.desktop-nav{display:flex; gap:22px; align-items:center}}
+
+/* Route-level loading screen */
+.route-loading{
+  position:fixed; inset:0; z-index:3000;
+  display:grid; place-items:center; gap:12px;
+  background:var(--bg);
+}
+.bag-spin{
+  width:84px; height:auto;
+  animation: bag-rotate 8s linear infinite; /* slow */
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,.12));
+}
+@keyframes bag-rotate { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+/* =========================
+   HERO: constant “edgy” animation pack
+   ========================= */
+@media (prefers-reduced-motion: no-preference){
+
+  /* 1) Ken Burns on the image (slow, alternating) */
+  .hero-media img,
+  .hero-media video{
+    animation: hero-kenburns 18s ease-in-out infinite alternate;
+    will-change: transform;
+    transform-origin: 50% 55%;
+  }
+  @keyframes hero-kenburns{
+    0%   { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.08) translate(1.5%, -1.5%); }
+  }
+
+  /* 2) Rotating light beam overlay */
+  .hero-media::before{
+    content:"";
+    position:absolute; inset:-12% -12%;
+    pointer-events:none;
+    z-index:3;
+    /* soft angled sheen that rotates */
+    background:
+      conic-gradient(from 220deg at 50% 50%,
+        rgba(255,255,255,0) 0 10%,
+        rgba(255,255,255,.25) 18%,
+        rgba(255,255,255,0) 26% 100%);
+    mix-blend-mode: overlay;
+    opacity:.35;
+    animation: hero-sweep 14s linear infinite;
+    transform: translateZ(0);
+  }
+  @keyframes hero-sweep{
+    to{ transform: rotate(360deg); }
+  }
+
+  /* 3) Subtle moving dot-grid texture */
+  .hero-media::after{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    z-index:2;
+    background-image:
+      radial-gradient(rgba(0,0,0,.06) 1px, transparent 1.2px);
+    background-size: 3px 3px;
+    opacity:.25;               /* light theme-friendly */
+    mix-blend-mode: multiply;  /* kisses shadows, avoids harshness */
+    animation: hero-grid 50s linear infinite;
+  }
+  @keyframes hero-grid{
+    to{ background-position: 1200px 800px; }
+  }
+
+  /* 4) Headline glitch shimmer (subtle, intermittent) */
+  .hero h1{
+    position:relative;
+  }
+  .hero h1::before,
+  .hero h1::after{
+    content: attr(data-glitch);
+    position:absolute; left:0; top:0;
+    pointer-events:none; user-select:none;
+    opacity:.18;
+    mix-blend-mode:multiply;
+  }
+  .hero h1::before{
+    color:#ff2e6a;             /* magenta channel */
+    animation: glitch-a 3200ms steps(20) infinite;
+  }
+  .hero h1::after{
+    color:#00d7ff;             /* cyan channel */
+    animation: glitch-b 2800ms steps(18) infinite;
+  }
+  @keyframes glitch-a{
+    0%,96%,100% { transform: translate(0,0); filter:none; opacity:.0; }
+    2%  { transform: translate(1px,-1px); opacity:.22; }
+    3%  { transform: translate(-2px,1px); }
+    4%  { transform: translate(2px,0); }
+    6%  { transform: translate(0,0); opacity:.12; }
+    30% { transform: translate(.5px,-.5px); }
+    60% { transform: translate(-.5px,.5px); }
+  }
+  @keyframes glitch-b{
+    0%,94%,100% { transform: translate(0,0); filter:none; opacity:.0; }
+    1%  { transform: translate(-1px,1px); opacity:.22; }
+    2%  { transform: translate(2px,-1px); }
+    5%  { transform: translate(-1px,0); }
+    8%  { transform: translate(0,0); opacity:.10; }
+    40% { transform: translate(-.5px,.5px); }
+    70% { transform: translate(.5px,-.5px); }
+  }
+}
+
+/* Layer sanity so overlays sit above image but below your vignette/text */
+.hero-media{ position:absolute; inset:0; }
+.hero-media .hero-vignette{ position:absolute; inset:0; z-index:4; }  /* above ::before/::after */
+.hero-inner{ position:relative; z-index:5; }                           /* text above everything */
+
+/* --- Make header NON-STICKY (scrolls away) --- */
+.site-header{
+  position: relative;          /* was fixed */
+  inset-inline: auto;
+  top: auto;
+  height: var(--header-h);
+  z-index: auto;               /* no stacking needed */
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 2px 12px rgba(0,0,0,.04);
+  backdrop-filter: none;
+}
+
+/* Neutralize the transparent/solid variants (keep the same look) */
+.site-header[data-state="top"],
+.site-header[data-state="scrolled"]{
+  background: var(--bg);
+  border-bottom-color: var(--line);
+  box-shadow: 0 2px 12px rgba(0,0,0,.04);
+}
+
+/* If someone left scroll-reveal on the header, never hide it */
+.site-header[data-anim]{ opacity: 1 !important; transform: none !important; }
+
+/* Header is no longer overlaying the hero, so remove top padding/offsets */
+.hero-inner{ padding-top: 0; }
+.hero, .section{ scroll-margin-top: 8px; }
+
+/* --- Header overlays the hero but scrolls with the page --- */
+.site-header{
+  position: absolute;          /* overlay, not fixed */
+  inset-inline: 0;
+  top: 0;
+  z-index: 1002;               /* above hero layers */
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Keep your top vs scrolled looks if you want the glass while still on hero */
+.site-header[data-state="top"]{
+  background: linear-gradient(to bottom, rgba(255,255,255,.78), rgba(255,255,255,0));
+  border-bottom-color: rgba(0,0,0,.06);
+  box-shadow: none;
+}
+.site-header[data-state="scrolled"]{
+  background: color-mix(in oklab, #ffffff 78%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom-color: var(--line);
+  box-shadow: 0 6px 22px rgba(0,0,0,.06);
+}
+
+/* Safety: never let scroll-reveal hide the header */
+.site-header[data-anim]{ opacity: 1 !important; transform: none !important; }
+
+/* Since the header is overlaying, give the hero content top padding */
+.hero-inner{ padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
+
+/* Anchors don’t need a big offset now */
+.hero, .section { scroll-margin-top: 8px; }
+
+/* --- Sidebar layering & click fixes --- */
+.sidebar{ z-index: 4001 !important; }   /* above everything */
+.overlay{ z-index: 4000 !important; }   /* below sidebar, above page */
+.site-header{ z-index: 1002 !important; } /* header stays under overlay/sidebar */
+
+/* When menu is open, prevent header from stealing clicks */
+.menu-open .site-header{ pointer-events: none; }
+
+/* Make sure the close button is always clickable */
+.sidebar-header{ position: sticky; top: 0; z-index: 2; }
+.close-x{ position: relative; z-index: 3; }
+
+/* Only show the 3 lines — no box, no border */
+.hamburger{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  width: 44px;                /* keep a comfy touch target */
+  height: 44px;
+  padding: 0;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);           /* line colour driven by currentColor */
+  transition: transform var(--dur-1) var(--ease-out);
+}
+.hamburger:hover { transform: translateY(-1px); }
+
+/* Bars */
+.hamburger span{
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;   /* uses .hamburger color */
+  transition: transform var(--dur-2) var(--ease-spring),
+             opacity var(--dur-2) var(--ease-out),
+             width var(--dur-2) var(--ease-out);
+}
+.hamburger span:nth-child(1){ transform: translateY(-6px); }
+.hamburger span:nth-child(2){ transform: translateY(0); }
+.hamburger span:nth-child(3){ transform: translateY(6px); }
+
+/* Open (X) state still works */
+.hamburger[data-state="open"] span:nth-child(1){ transform: rotate(45deg); width:22px; }
+.hamburger[data-state="open"] span:nth-child(2){ opacity:0; }
+.hamburger[data-state="open"] span:nth-child(3){ transform: rotate(-45deg); width:22px; }
+
+/* Kill the old “top state” box styling */
+.site-header[data-state="top"] .hamburger{
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* Accessibility: visible focus without a box */
+.hamburger:focus-visible{
+  outline: 2px solid color-mix(in oklab, var(--fg) 55%, transparent);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+body{ font-family: var(--font-sans), ui-sans-serif, system-ui; }
+h1,h2,h3{ font-family: var(--font-serif), ui-serif, Georgia, serif; letter-spacing:-.01em; }
+
+/* === Founders split (photo left, copy right) === */
+.founders { padding-block: var(--space-section); }
+
+.founders-wrap{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+
+/* Photo pane */
+.founders-photo{
+  margin:0;
+  border-radius: var(--radius-lg);
+  overflow:hidden;
+  background:#fff;
+  border:1px solid var(--line);
+  box-shadow: 0 12px 36px rgba(0,0,0,.06);
+  min-height: clamp(360px, 58vh, 720px);
+}
+.founders-photo img{
+  width:100%; height:100%; object-fit: cover; display:block;
+  transform: translateZ(0);
+}
+
+/* Text pane */
+.founders-text{ max-width: 66ch; }
+
+.founders-title{
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(2.2rem, 4.8vw, 4rem);
+  line-height: 1.05;
+  margin: 0 0 .2em;
+  letter-spacing: -.01em;
+  color: var(--fg);
+}
+
+.founders-names{
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  margin: 0 0 1.1rem;
+  color: var(--fg);
+}
+
+.founders-copy p{
+  margin: 0 0 1rem;
+  color: var(--fg);
+  line-height: 1.9;
+}
+
+/* Quote + signat*
+
+
+/* === Section arrival (curtain + soft wash) === */
+.services-section{ position: relative; overflow: clip; }
+.services-section::before,
+.services-section::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  opacity:0; transform: translateY(24px);
+  transition: opacity .8s var(--ease-out), transform .8s var(--ease-out);
+}
+.services-section::before{
+  background: linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,0));
+}
+.services-section::after{
+  background: radial-gradient(80% 60% at 50% 0%, rgba(0,0,0,.06), transparent 70%);
+  transform: translateY(40px);
+  transition-delay: .12s;
+}
+/* When your IntersectionObserver marks the section "in" */
+.services-section.in::before,
+.services-section.in::after,
+.services-section[data-in="true"]::before,
+.services-section[data-in="true"]::after{
+  opacity:1; transform: translateY(0);
+}
+
+/* === Service cards with icons === */
+.cards.services{ margin-top: 28px; }
+.card.service{
+  display:flex; flex-direction:column; gap:12px;
+  transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s ease;
+  transform: translateY(18px) scale(.985);
+  opacity: 0;
+}
+/* Reveal (works for .in or [data-in="true"]) */
+.card.service.in,
+.card.service[data-in="true"]{
+  transform: none;
+  opacity: 1;
+}
+.card.service:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(0,0,0,.08);
+  border-color: color-mix(in oklab, var(--line) 60%, #0000);
+}
+
+/* Icon styling */
+.service-icon{
+  width: 76px; height: 76px; object-fit: contain;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.06));
+  transform: translateY(4px);
+  transition: transform .35s var(--ease-out);
+}
+.card.service:hover .service-icon{ transform: translateY(0); }
+
+/* Slightly larger than default, but smaller than last version */
+.services-section h2{
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  font-size: clamp(2.2rem, 4.4vw, 3rem);   /* ↓ was max 3.8rem */
+  line-height: 1.06;
+  margin: 0 0 .35rem;
+}
+
+/* Keep body copy comfortable */
+.services-section .max{
+  font-size: clamp(1rem, 1.25vw, 1.1rem);
+}
+
+/* Card titles: a nudge up from default, not oversized */
+.card.service h3{
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);  /* ↓ was max 1.75rem */
+  line-height: 1.2;
+  margin: 6px 0 6px;
+  letter-spacing: .005em;
+}
+
+/* Smooth fade of the hero image into the page background */
+:root{ --blend-h: clamp(70px, 12vw, 160px); }
+
+/* Fade the bottom of the hero *media* to transparent so the page bg shows */
+.hero-media{
+  /* keeps everything else the same */
+  -webkit-mask-image: linear-gradient(to bottom, #000 68%, rgba(0,0,0,0) 100%);
+          mask-image: linear-gradient(to bottom, #000 68%, rgba(0,0,0,0) 100%);
+}
+
+/* Optional: add a soft wash at the *start* of Services to hide any seam */
+.services-section{ position: relative; }
+.services-section::before{
+  content:"";
+  position: absolute; left:0; right:0; top: calc(-1 * var(--blend-h));
+  height: var(--blend-h);
+  pointer-events: none;
+  /* fades from your page background into transparent */
+  background: linear-gradient(to bottom, var(--bg) 0%, rgba(248,247,244,0) 100%);
+}
+
+/* Make Founders heading same size as Services heading */
+.founders .founders-title{
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  font-size: clamp(2.2rem, 4.4vw, 3rem); /* same as .services-section h2 */
+  line-height: 1.06;
+  margin: 0 0 .35rem;
+}
+
+/* Optional: make the italic names line sit smaller under it */
+.founders .founders-names{
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+}
+
+/* ===== Compact scale: make everything a bit smaller ===== */
+
+/* Base text a touch smaller */
+body{ font-size: 15px; } /* was 16px */
+
+/* Key variables (spacing, header, radii, headings) */
+:root{
+  --header-h: clamp(52px, 6vw, 64px);
+  --space-section: clamp(64px, 8vw, 110px);
+  --space-grid: 22px;
+  --radius: 14px;
+  --radius-lg: 18px;
+
+  /* Headline scale down */
+  --fs-h1: clamp(2.0rem, 4.2vw, 3.4rem);
+  --fs-h2: clamp(1.4rem, 2.4vw, 2.1rem);
+  --fs-h3: clamp(1.0rem, 1.4vw, 1.15rem);
+}
+
+/* Section titles (Services + Founders) */
+.services-section h2,
+.founders .founders-title{
+  font-size: clamp(2rem, 3.6vw, 2.6rem); /* was 2.2–3rem */
+  line-height: 1.06;
+}
+
+/* Card titles */
+.card.service h3{
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem); /* was up to 1.4rem */
+}
+
+/* Body copy under section titles */
+.services-section .max,
+.founders .founders-copy p,
+.lead{
+  font-size: clamp(.98rem, 1.1vw, 1.05rem);
+  line-height: 1.75;
+}
+
+/* Cards: slightly tighter */
+.card{ padding: 18px; border-radius: var(--radius); }
+.points li{ padding: 6px 10px; }
+
+/* Icons a bit smaller */
+.service-icon{ width: 64px; height: 64px; }
+
+/* Process steps tighter */
+.step{ padding: 14px; }
+.step-num{ width:44px; height:44px; }
+
+/* Buttons a touch smaller */
+.btn{ padding: 10px 16px; border-radius: 12px; font-weight: 700; }
+
+/* Hero heading spacing */
+.hero h1{ margin: .3rem 0 .6rem; }
+
+/* Looks grid tiles slightly shorter */
+.ig-grid img{ height: 150px; }
+
+/* Footer padding smaller */
+.footer{ padding: calc(var(--space-section)/2.4) 20px; }
+
+/* === Spacious vertical rhythm (overrides compact) === */
+:root{
+  --space-section: clamp(96px, 12vw, 180px);  /* was 64–110px */
+  --space-grid: 32px;                         /* wider gaps inside grids/cards */
+}
+
+/* Give each section more breathing room */
+.section{
+  padding: calc(var(--space-section) * 1.15) 20px; /* bump both top+bottom */
+}
+
+/* Extra space BETWEEN consecutive sections (top edge only) */
+.section + .section{
+  padding-top: calc(var(--space-section) * 1.6);
+}
+
+/* Key sections get a touch more */
+.services-section,
+.founders{
+  padding-block: calc(var(--space-section) * 1.35);
+}
+
+/* Keep mobile reasonable */
+@media (max-width: 640px){
+  :root{ --space-section: clamp(84px, 14vw, 130px); }
+  .section + .section{ padding-top: calc(var(--space-section) * 1.25); }
+}
+
+/* Optional: slightly taller CTA band so it feels equal too */
+.cta-inner{ padding: calc(var(--space-section) * 0.75) 0; }
+
+/* Center only the icons in service cards */
+.card.service .service-icon{
+  align-self: center;          /* centers in the flex column */
+  display: block;
+  margin: 6px auto 10px;       /* little breathing room */
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.card.service{ align-items: center; text-align: center; }
+
+/* Size knob for the hero logo */
+:root{
+  --hero-logo-w: clamp(140px, 22vw, 320px); /* tweak this to taste */
+}
+
+/* Center the logo inside the hero without changing hero height */
+.hero-media{
+  display: grid;
+  place-items: center;
+}
+
+/* Make the logo small, crisp, and above the vignette */
+.hero-logo{
+  width: var(--hero-logo-w);
+  height: auto;
+  object-fit: contain;
+  position: relative;
+  z-index: 5;                 /* sits above .hero-vignette */
+  image-rendering: -webkit-optimize-contrast;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  /* kill the global hero-media img animations/cover rules */
+  animation: none !important;
+  filter: none !important;
+  transform-origin: center !important;
+}
+
+/* Ensure the generic "hero-media img" cover rules don't win */
+.hero-media img{ width:100%; height:100%; object-fit:cover; }
+.hero-media .hero-logo{
+  width: var(--hero-logo-w) !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+:root { --hero-logo-w: 550px; }   /* change 220 to try sizes */
+
+/* Section break: centered image by default */
+.section-break{
+  display:flex; justify-content:center; align-items:center;
+  margin: clamp(28px, 6vw, 64px) 0;   /* space above & below */
+  pointer-events: none;               /* purely decorative */
+}
+.section-break img{
+  width: clamp(160px, 36vw, 520px);   /* responsive width */
+  height: auto;
+  opacity: .85;                       /* soften a touch */
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.06));
+}
+
+/* Optional: make the line stretch across by repeating the image */
+.section-break.repeat{
+  height: 24px;                       /* match your line art height */
+  background-image: url("/line.png");
+  background-repeat: repeat-x;
+  background-position: center;
+  background-size: auto 100%;         /* keep image height, repeat horizontally */
+}
+
+.section-break{ margin-block:8px; line-height:0; }
+.section-break img{ display:block; margin:0 auto; }
+.section-break.repeat{ height:10px; background:center/auto 10px repeat-x url("/line.png"); }
+
+
+/* --- Welcome section --- */
+.welcome h2{
+  font-family: var(--font-serif, Georgia, serif);
+  font-weight: 600;
+  letter-spacing: -.01em;
+  font-size: clamp(2rem, 3.6vw, 2.6rem); /* matches your Services/Founders scale */
+  line-height: 1.06;
+  margin: 0 0 .5rem;
+}
+
+.welcome .eyebrow{
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  color: var(--muted);
+  margin-bottom: .35rem;
+}
+
+.welcome .max{
+  margin-bottom: 1.2rem;
+}
+
+.pillars{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-grid);
+  margin-top: 18px;
+}
+
+.pillar{
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.05);
+  transition: transform .28s var(--ease-out), box-shadow .28s var(--ease-out), border-color .2s ease;
+}
+.pillar h3{
+  margin: 6px 0 6px;
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  letter-spacing: .005em;
+}
+.pillar p{ margin: 0; color: var(--muted); }
+.pillar:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.08);
+  border-color: color-mix(in oklab, var(--line) 60%, transparent);
+}
+
+.welcome-cta{
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+/* Welcome section specific styling */
+.welcome{
+  background: #C7C7C7;             /* light grey you asked for */
+  border-top: 1px solid #bdbdbd;   /* subtle separators (optional) */
+  border-bottom: 1px solid #bdbdbd;
+}
+
+/* Optional: gentle text coloring on grey */
+.welcome .eyebrow,
+.welcome .max { color: var(--fg); }
+
+/* Welcome: light grey + centered content */
+.welcome{
+  background:#C7C7C7;
+  border-top:1px solid #bdbdbd;
+  border-bottom:1px solid #bdbdbd;
+}
+
+/* Center everything inside */
+.welcome .container{
+  text-align:center;
+  max-width: 900px;         /* keeps lines readable */
+  margin-inline:auto;
+  display:grid;
+  justify-items:center;     /* centers the icon/eyebrow/btn if added */
+  gap: 10px;
+}
+
+/* Make the paragraph block center itself too */
+.welcome .max{
+  margin-inline:auto;
+}
+
+
+
+/* Inside the grey band */
+.welcome { 
+  padding-top: 50px; 
+  padding-bottom: 50px; 
+}
+
+
+/* Inside the grey band */
+.services { 
+  padding-top: 5px; 
+  padding-bottom: 50px; 
+}
+
+#services.section{
+  padding-top: 100px;
+  padding-bottom: 10px;
+}
+
+/* Services cards: same as page background */
+.services-section .card,
+.card.service{
+  background: var(--bg);   /* or 'transparent' */
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Keep the nice hover lift without adding color */
+.card.service:hover{
+  transform: translateY(-4px);
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* default size */
+:root{
+  --service-icon: 180px;   /* change this to try sizes */
+}
+
+.card.service .service-icon{
+  width: var(--service-icon);
+  height: var(--service-icon);
+  object-fit: contain;
+  display: block;
+  margin: 6px auto 10px;   /* stays centered */
+}
+
+/* Center only the Services heading and its intro sentence */
+#services > .container > h2 {
+  text-align: center;
+}
+
+
+
+
+
+.services-line{
+  --line-h: 10px;                      /* line area height; adjust gap feel */
+  height: var(--line-h);
+  margin: 80px auto 28px;
+  width: 100%;
+  max-width: 1200px;                   /* match cards/container width */
+  background: center / 100% 100% no-repeat url("/wavy2.svg");
+}
+
+.services-section + .founders { padding-top: 40px; }
+.services-line { margin: 18px auto 14px; }
+
+/* Founders: make the bottom space smaller */
+.founders{
+  /* Shrink only the bottom padding inside the Founders section */
+  padding-bottom: calc(var(--section-pad-y) * 0.3);
+}
+
+/* Also pull the next section closer (optional; tweak the 0.7) */
+.founders + .section{
+  margin-top: calc(var(--section-gap) * 0.5);
+}
+
+/* Even tighter on phones (optional) */
+@media (max-width: 640px){
+  .founders{ padding-bottom: calc(var(--section-pad-y) * 0.45); }
+  .founders + .section{ margin-top: calc(var(--section-gap) * 0.6); }
+}
+
+
+/* ===== Scroll-drawn squiggle ===== */
+.squiggle-wrap{
+  position: sticky;      /* pins during scroll */
+  top: 0;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;            /* keep behind content */
+}
+.squiggle-svg{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.squiggle-svg path{
+  fill: none;
+  stroke: #111;          /* change colour to taste */
+  stroke-width: 3px;
+  stroke-linecap: round;
+  opacity: .9;
+}
+/* keep page content above the squiggle */
+main, section, header, footer, .hero, .container{
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== Scroll-drawn vertical squiggle ===== */
+.squiggle-wrap{
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;                 /* behind page content */
+}
+.squiggle-svg{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.squiggle-svg path{
+  fill: none;
+  stroke: #111;               /* change to #fff on dark bg */
+  stroke-width: 3px;
+  stroke-linecap: round;
+  opacity: .9;
+}
+
+/* Ensure page content sits above the line */
+main.site,
+.site header, header.site-header,
+.section, .hero, .container, footer.footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Optional: give this route the 'VoicePage' blue shell */
+main.site{
+  background: #ffffff;        /* same blue as working page */
+  color: #fff;
+}
+
+/* Optional: keep body copy readable on blue */
+.section p, .lead, .muted { color: rgba(255,255,255,.82); }
+

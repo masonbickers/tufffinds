@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Brand</title>
+  <meta name="description" content="Short description of your site." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#home">Your Brand</a>
+    <button class="burger" aria-label="Toggle menu">☰</button>
+    <nav class="menu">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home" class="section hero">
+      <div class="container">
+        <h1>Single-scroll website</h1>
+        <p>Clean, fast, and mobile-friendly. Scroll down to explore.</p>
+        <a href="#contact" class="btn">Get in touch</a>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="container">
+        <h2>About</h2>
+        <p>Write a short, punchy paragraph about who you are and what you do.</p>
+      </div>
+    </section>
+
+    <section id="services" class="section alt">
+      <div class="container grid">
+        <div>
+          <h3>Service One</h3>
+          <p>Brief description of your first service.</p>
+        </div>
+        <div>
+          <h3>Service Two</h3>
+          <p>Brief description of your second service.</p>
+        </div>
+        <div>
+          <h3>Service Three</h3>
+          <p>Brief description of your third service.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="work" class="section">
+      <div class="container grid-3">
+        <article class="card"><img src="https://picsum.photos/600/400?1" alt=""><h4>Project A</h4></article>
+        <article class="card"><img src="https://picsum.photos/600/400?2" alt=""><h4>Project B</h4></article>
+        <article class="card"><img src="https://picsum.photos/600/400?3" alt=""><h4>Project C</h4></article>
+      </div>
+    </section>
+
+    <section id="contact" class="section alt">
+      <div class="container">
+        <h2>Contact</h2>
+        <form class="contact-form" onsubmit="return false;">
+          <label>Name<input type="text" required></label>
+          <label>Email<input type="email" required></label>
+          <label>Message<textarea rows="4" required></textarea></label>
+          <button class="btn">Send</button>
+        </form>
+        <p class="muted">Replace this form with your real one (Netlify Forms, Formspree, etc.).</p>
+      </div>
+    </section>
+  </main>
+
+  <button id="toTop" class="to-top" aria-label="Back to top">↑</button>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© <span id="year"></span> Your Brand. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

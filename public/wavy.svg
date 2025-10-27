@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <!-- Pink that fades to transparent at the edges -->
+    <linearGradient id="edge" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f06cab" stop-opacity="0"/>
+      <stop offset=".08" stop-color="#f06cab" stop-opacity="1"/>
+      <stop offset=".92" stop-color="#f06cab" stop-opacity="1"/>
+      <stop offset="1" stop-color="#f06cab" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Wavy path, 6px thick -->
+  <!-- Centerline y=20, amplitude ≈ 6px (peaks at ~14 / 26) -->
+  <path
+    d="M0 20
+       Q 30 14, 60 20 T 120 20 T 180 20 T 240 20 T 300 20 T 360 20
+       T 420 20 T 480 20 T 540 20 T 600 20 T 660 20 T 720 20
+       T 780 20 T 840 20 T 900 20 T 960 20 T 1020 20 T 1080 20
+       T 1140 20 T 1200 20"
+    fill="none"
+    stroke="url(#edge)"
+    stroke-width="6"
+    stroke-linecap="round"
+    vector-effect="non-scaling-stroke"
+  />
+</svg>

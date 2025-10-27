@@ -1,0 +1,8 @@
+<!-- /public/line.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 20" preserveAspectRatio="none">
+  <path d="M12 10 H1188"
+        stroke="#e98aceff"       
+        stroke-width="4"
+        stroke-linecap="round"
+        fill="none"/>
+</svg>

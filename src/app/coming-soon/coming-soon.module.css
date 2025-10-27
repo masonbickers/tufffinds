@@ -1,0 +1,126 @@
+/* Scope so global styles don't leak */
+.cs {
+  isolation: isolate;          /* enables safe stacking for ::after layer */
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: #F8F7F3;
+  color: #000000;
+
+  /* initial values used by the JS loop */
+  --tx: 10vw;                  /* current x (viewport %) */
+  --ty: 16vh;                  /* current y (viewport %) */
+  --angle: 0deg;               /* current rotation */
+  --icon-size: 84px;           /* icon box size */
+  --icon-alpha: 0.75;          /* opacity */
+}
+
+/* floating sprite driven by CSS variables (no layout impact) */
+.cs::after{
+  content:"";
+  position: fixed;              /* follow viewport */
+  left: 0; top: 0;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  pointer-events: none;
+  z-index: 0;
+
+  background: url("/icon.png") center/contain no-repeat;
+  opacity: var(--icon-alpha);
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.08));
+
+  /* JS updates these variables for constant speed + random walk + spin */
+  transform: translate(var(--tx), var(--ty)) rotate(var(--angle));
+  will-change: transform;
+}
+
+/* motion safety */
+@media (prefers-reduced-motion: reduce){
+  .cs::after{ display: none; }
+}
+
+.csInner {
+  position: relative;
+  z-index: 1; /* ensure above ::after */
+  width: 100%;
+  max-width: 560px;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+/* ---------- Logo (crisp) ---------- */
+.logoWrap {
+  width: clamp(240px, 42vw, 460px); /* visual width knob */
+  aspect-ratio: 23 / 5;             /* set to your logo’s real ratio */
+  margin: 0 auto 18px;
+  position: relative;               /* required for Image fill */
+}
+
+.logoImg {
+  object-fit: contain;
+  object-position: center;
+  filter: none;                     /* avoid softening edges */
+}
+
+/* ---------- Text ---------- */
+.title { font-size: clamp(20px, 4vw, 26px); font-weight: 400; margin: 20px 0 6px; }
+
+.sub{
+  color: #797979;
+  margin: 0 0 16px;
+  /* handwriting-style stack */
+  font-family:
+    "Snell Roundhand",
+    "Zapfino",
+    "Bradley Hand",
+    "Chalkboard SE",
+    "Segoe Script",
+    "Lucida Handwriting",
+    "Comic Sans MS",
+    cursive;
+  font-size: 1.5em;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Form ---------- */
+.form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.input {
+  appearance: none;
+  border: 1px solid #cfcfcf;
+  background: #F8F7F3;
+  color: #000;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+}
+.input::placeholder { color: #424242; }
+.input:focus { border-color: #888; }
+
+.button {
+  border: 0;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s ease;
+}
+.button:hover { opacity: .9; }
+.button:disabled { opacity: .6; cursor: default; }
+
+.msgOk  { color: #22c55e; font-size: 13px; margin-top: 10px; }
+.msgErr { color: #ef4444; font-size: 13px; margin-top: 10px; }
+
+.footer { margin-top: 18px; color:#9ca3af; font-size: 10px; }
