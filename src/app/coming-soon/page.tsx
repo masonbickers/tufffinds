@@ -132,7 +132,7 @@ export default function ComingSoonPage() {
             src="/finallogobrown.png"              /* high-res PNG or SVG in /public */
             alt="Logo"
             fill
-            sizes="(max-width: 940px) 75vw, 460px"
+            sizes="(max-width: 940px) 75vw, 600px"
             priority
             className={styles.logoImg}
           />

@@ -6,7 +6,7 @@
   display: grid;
   place-items: center;
   background: #F8F7F3;
-  color: #000000;
+  color: #41342E;
 
   /* initial values used by the JS loop */
   --tx: 10vw;                  /* current x (viewport %) */
@@ -57,6 +57,7 @@
   position: relative;               /* required for Image fill */
 }
 
+
 .logoImg {
   object-fit: contain;
   object-position: center;
@@ -67,7 +68,7 @@
 .title { font-size: clamp(20px, 4vw, 26px); font-weight: 400; margin: 20px 0 6px; }
 
 .sub{
-  color: #797979;
+  color: #41342E;
   margin: 0 0 16px;
   /* handwriting-style stack */
   font-family:
@@ -104,14 +105,14 @@
   font-size: 14px;
   outline: none;
 }
-.input::placeholder { color: #424242; }
+.input::placeholder { color: #41342E; }
 .input:focus { border-color: #888; }
 
 .button {
   border: 0;
   padding: 12px 18px;
   border-radius: 12px;
-  background: #111;
+  background: #41342E;
   color: #fff;
   font-weight: 600;
   cursor: pointer;

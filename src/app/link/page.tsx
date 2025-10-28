@@ -4,6 +4,9 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { WHATSAPP_POOL, type WaTarget } from "@/app/lib/whatsappPool";
+import { db } from "../lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+
 
 /** Weighted random pick (roulette wheel) */
 function pickWeightedRandom(pool: WaTarget[]): WaTarget {
