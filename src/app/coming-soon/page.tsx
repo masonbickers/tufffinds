@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./coming-soon.module.css";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+// ⬇️ change: use setDoc/doc (unique by email) instead of addDoc/collection
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
 export default function ComingSoonPage() {
@@ -109,18 +110,30 @@ export default function ComingSoonPage() {
 
     try {
       setStatus("loading");
-      await addDoc(collection(db, "waitlist"), {
-        email: email.trim().toLowerCase(),
-        createdAt: serverTimestamp(),
-        ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
-      });
+      const emailLC = email.trim().toLowerCase();
+      // ⬇️ change: write to waitlist/{email} so duplicates overwrite, not spam
+      await setDoc(
+        doc(db, "waitlist", emailLC),
+        {
+          email: emailLC,
+          createdAt: serverTimestamp(),
+          source: "web:coming-soon",
+          ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        },
+        { merge: true }
+      );
+
       setStatus("ok");
       setMessage("You’re on the list! We’ll be in touch soon.");
       setEmail("");
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("[waitlist:add]", err?.code, err?.message);
       setStatus("err");
-      setMessage("Something went wrong. Please try again.");
+      setMessage(
+        err?.code === "permission-denied"
+          ? "We’re not allowed to write. Check Firestore rules."
+          : "Something went wrong. Please try again."
+      );
     }
   };
 

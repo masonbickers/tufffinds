@@ -121,7 +121,7 @@
 .button:hover { opacity: .9; }
 .button:disabled { opacity: .6; cursor: default; }
 
-.msgOk  { color: #22c55e; font-size: 13px; margin-top: 10px; }
-.msgErr { color: #ef4444; font-size: 13px; margin-top: 10px; }
+.msgOk  { color: #41342E; font-size: 13px; margin-top: 10px; }
+.msgErr { color: #000000; font-size: 13px; margin-top: 10px; }
 
-.footer { margin-top: 18px; color:#9ca3af; font-size: 10px; }
+.footer { margin-top: 18px; color:#41342E; font-size: 10px; }
