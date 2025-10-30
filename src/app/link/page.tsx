@@ -4,9 +4,6 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { WHATSAPP_POOL, type WaTarget } from "@/app/lib/whatsappPool";
-import { db } from "../lib/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-
 
 /** Weighted random pick (roulette wheel) */
 function pickWeightedRandom(pool: WaTarget[]): WaTarget {
@@ -42,7 +39,7 @@ function clearAssignmentCookie() {
 function getCycledTarget(pool: WaTarget[]): WaTarget {
   const k = "wa_cycle_idx";
   const n = pool.length;
-  const idx = Number(localStorage.getItem(k) ?? "0") || 0; // const ✅
+  const idx = Number(localStorage.getItem(k) ?? "0") || 0;
   const picked = pool[idx % n];
   const nextIdx = (idx + 1) % n;
   localStorage.setItem(k, String(nextIdx));
@@ -83,14 +80,12 @@ export default function LinkRotator() {
         );
       }
       if (!target) {
-        // First time on this device: weighted random, then store the key
         const picked = pickWeightedRandom(WHATSAPP_POOL);
         writeAssignmentCookie(picked.key);
         target = picked;
       }
     }
 
-    // Fallback (shouldn't happen)
     if (!target) target = WHATSAPP_POOL[0];
 
     const msg = (textOverride || target.text || "").trim();

@@ -3,9 +3,13 @@
 import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./coming-soon.module.css";
-// ⬇️ change: use setDoc/doc (unique by email) instead of addDoc/collection
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { FirebaseError } from "firebase/app"; // ✅ for proper error typing
+
+// Narrow unknown -> FirebaseError when possible
+const isFirebaseError = (e: unknown): e is FirebaseError =>
+  typeof e === "object" && e !== null && "code" in e && "message" in e;
 
 export default function ComingSoonPage() {
   const [email, setEmail] = useState("");
@@ -47,10 +51,10 @@ export default function ComingSoonPage() {
       if (resizeTO) window.clearTimeout(resizeTO);
       resizeTO = window.setTimeout(() => {
         // Clamp current and target to new viewport size
-        x = Math.min(Math.max(x, (MIN_VW/100)*innerWidth), (MAX_VW/100)*innerWidth);
-        y = Math.min(Math.max(y, (MIN_VH/100)*innerHeight), (MAX_VH/100)*innerHeight);
-        tx = Math.min(Math.max(tx, (MIN_VW/100)*innerWidth), (MAX_VW/100)*innerWidth);
-        ty = Math.min(Math.max(ty, (MIN_VH/100)*innerHeight), (MAX_VH/100)*innerHeight);
+        x = Math.min(Math.max(x, (MIN_VW / 100) * innerWidth), (MAX_VW / 100) * innerWidth);
+        y = Math.min(Math.max(y, (MIN_VH / 100) * innerHeight), (MAX_VH / 100) * innerHeight);
+        tx = Math.min(Math.max(tx, (MIN_VW / 100) * innerWidth), (MAX_VW / 100) * innerWidth);
+        ty = Math.min(Math.max(ty, (MIN_VH / 100) * innerHeight), (MAX_VH / 100) * innerHeight);
       }, 120);
     };
     window.addEventListener("resize", onResize);
@@ -73,7 +77,8 @@ export default function ComingSoonPage() {
 
       if (dist < SPEED_PX_PER_SEC * dt) {
         // Arrived (or very close): snap to target and choose a new one
-        x = tx; y = ty;
+        x = tx;
+        y = ty;
         pickTarget();
       } else if (dist > 0) {
         const ux = dx / dist;
@@ -111,7 +116,7 @@ export default function ComingSoonPage() {
     try {
       setStatus("loading");
       const emailLC = email.trim().toLowerCase();
-      // ⬇️ change: write to waitlist/{email} so duplicates overwrite, not spam
+      // ⬇️ write to waitlist/{email} so duplicates overwrite, not spam
       await setDoc(
         doc(db, "waitlist", emailLC),
         {
@@ -126,14 +131,21 @@ export default function ComingSoonPage() {
       setStatus("ok");
       setMessage("You’re on the list! We’ll be in touch soon.");
       setEmail("");
-    } catch (err: any) {
-      console.error("[waitlist:add]", err?.code, err?.message);
-      setStatus("err");
-      setMessage(
-        err?.code === "permission-denied"
-          ? "We’re not allowed to write. Check Firestore rules."
-          : "Something went wrong. Please try again."
-      );
+    } catch (err: unknown) {
+      // ✅ no-explicit-any compliant error handling
+      if (isFirebaseError(err)) {
+        console.error("[waitlist:add]", err.code, err.message);
+        setStatus("err");
+        setMessage(
+          err.code === "permission-denied"
+            ? "We’re not allowed to write. Check Firestore rules."
+            : "Something went wrong. Please try again."
+        );
+      } else {
+        console.error("[waitlist:add] Unknown error", err);
+        setStatus("err");
+        setMessage("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -142,7 +154,7 @@ export default function ComingSoonPage() {
       <div className={styles.csInner}>
         <div className={styles.logoWrap}>
           <Image
-            src="/finallogobrown.png"              /* high-res PNG or SVG in /public */
+            src="/finallogobrown.png"
             alt="Logo"
             fill
             sizes="(max-width: 940px) 75vw, 600px"
@@ -167,9 +179,7 @@ export default function ComingSoonPage() {
           </button>
         </form>
 
-        {message && (
-          <p className={status === "ok" ? styles.msgOk : styles.msgErr}>{message}</p>
-        )}
+        {message && <p className={status === "ok" ? styles.msgOk : styles.msgErr}>{message}</p>}
 
         <p className={styles.footer}>© {new Date().getFullYear()} — All rights reserved.</p>
       </div>
