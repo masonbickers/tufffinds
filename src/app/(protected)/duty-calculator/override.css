@@ -1,0 +1,23 @@
+/* HARD RESET FOR THIS PAGE — overrides globals.css */
+.duty-wrapper {
+  all: unset;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+  background: #ffffff !important;
+}
+
+/* inner max-width container */
+.duty-inner {
+  all: unset;
+  width: 100% !important;
+  max-width: 960px !important;
+  padding: 40px 20px !important;
+  display: block !important;
+}
+
+/* reset text alignment */
+.duty-wrapper * {
+  text-align: left !important;
+}

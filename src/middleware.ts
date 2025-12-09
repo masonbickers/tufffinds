@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 const ALLOW = [
   /^\/coming-soon(\/|$)/,
   /^\/link(\/|$)/,
+  /^\/duty-calculator(\/|$)/,   // ← ADD THIS
   /^\/api(\/|$)/,
   /^\/_next\//,
   /^\/favicon\.ico$/,
@@ -12,6 +13,7 @@ const ALLOW = [
   /^\/sitemap\.xml$/,
   /\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|map|txt)$/
 ];
+
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
