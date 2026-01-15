@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./coming-soon.module.css";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -12,10 +13,18 @@ const isFirebaseError = (e: unknown): e is FirebaseError =>
   typeof e === "object" && e !== null && "code" in e && "message" in e;
 
 export default function ComingSoonPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
   const [message, setMessage] = useState("");
   const rootRef = useRef<HTMLElement | null>(null);
+
+  // ✅ Subtle top-right access
+  const [showAccess, setShowAccess] = useState(false);
+  const [pw, setPw] = useState("");
+  const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "err">("idle");
+  const [pwMsg, setPwMsg] = useState("");
 
   // === Floating icon: constant-speed random walk + slow spin ===
   useEffect(() => {
@@ -23,11 +32,13 @@ export default function ComingSoonPage() {
     if (!el) return;
 
     // CONFIG
-    const SPEED_PX_PER_SEC = 60; // <-- movement speed (pixels/second). Tweak to taste.
-    const SPIN_DEG_PER_SEC = 20; // <-- spin speed (degrees/second). Tweak to taste.
+    const SPEED_PX_PER_SEC = 60; // movement speed (pixels/second)
+    const SPIN_DEG_PER_SEC = 20; // spin speed (degrees/second)
     // Safe bounds so it never goes off-screen (as % of viewport)
-    const MIN_VW = 10, MAX_VW = 75;
-    const MIN_VH = 16, MAX_VH = 78;
+    const MIN_VW = 10,
+      MAX_VW = 75;
+    const MIN_VH = 16,
+      MAX_VH = 78;
 
     // State
     let angle = 0; // degrees
@@ -35,7 +46,8 @@ export default function ComingSoonPage() {
     let x = (MIN_VW / 100) * window.innerWidth;
     let y = (MIN_VH / 100) * window.innerHeight;
     // First random target
-    let tx = x, ty = y;
+    let tx = x,
+      ty = y;
 
     function pickTarget() {
       tx = (randBetween(MIN_VW, MAX_VW) / 100) * window.innerWidth;
@@ -51,10 +63,22 @@ export default function ComingSoonPage() {
       if (resizeTO) window.clearTimeout(resizeTO);
       resizeTO = window.setTimeout(() => {
         // Clamp current and target to new viewport size
-        x = Math.min(Math.max(x, (MIN_VW / 100) * innerWidth), (MAX_VW / 100) * innerWidth);
-        y = Math.min(Math.max(y, (MIN_VH / 100) * innerHeight), (MAX_VH / 100) * innerHeight);
-        tx = Math.min(Math.max(tx, (MIN_VW / 100) * innerWidth), (MAX_VW / 100) * innerWidth);
-        ty = Math.min(Math.max(ty, (MIN_VH / 100) * innerHeight), (MAX_VH / 100) * innerHeight);
+        x = Math.min(
+          Math.max(x, (MIN_VW / 100) * innerWidth),
+          (MAX_VW / 100) * innerWidth
+        );
+        y = Math.min(
+          Math.max(y, (MIN_VH / 100) * innerHeight),
+          (MAX_VH / 100) * innerHeight
+        );
+        tx = Math.min(
+          Math.max(tx, (MIN_VW / 100) * innerWidth),
+          (MAX_VW / 100) * innerWidth
+        );
+        ty = Math.min(
+          Math.max(ty, (MIN_VH / 100) * innerHeight),
+          (MAX_VH / 100) * innerHeight
+        );
       }, 120);
     };
     window.addEventListener("resize", onResize);
@@ -132,7 +156,6 @@ export default function ComingSoonPage() {
       setMessage("You’re on the list! We’ll be in touch soon.");
       setEmail("");
     } catch (err: unknown) {
-      // ✅ no-explicit-any compliant error handling
       if (isFirebaseError(err)) {
         console.error("[waitlist:add]", err.code, err.message);
         setStatus("err");
@@ -149,8 +172,147 @@ export default function ComingSoonPage() {
     }
   };
 
+  const onPasswordSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setPwMsg("");
+    setPwStatus("loading");
+
+    const PASSWORD = "Ginny01Gina01";
+    const ok = (pw || "").trim() === PASSWORD;
+
+    if (!ok) {
+      setPwStatus("err");
+      setPwMsg("Incorrect password.");
+      return;
+    }
+
+    try {
+      sessionStorage.setItem("tufffinds_v1_ok", "1"); // optional
+    } catch {
+      // ignore
+    }
+
+    router.push("/version-1");
+  };
+
   return (
     <main ref={rootRef} className={styles.cs}>
+      {/* ✅ Subtle access entry (top-right, not obvious) */}
+      <div
+        style={{
+          position: "fixed",
+          top: 22,
+          right: 24,
+          zIndex: 50,
+          fontSize: 11,
+          letterSpacing: "0.32em",
+          textTransform: "uppercase",
+          userSelect: "none",
+        }}
+      >
+        {!showAccess ? (
+          <button
+            type="button"
+            onClick={() => {
+              setShowAccess(true);
+              setPwMsg("");
+              setPwStatus("idle");
+            }}
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              color: "rgba(0,0,0,0.45)",
+            }}
+            aria-label="Access"
+          >
+            Access
+          </button>
+        ) : (
+          <form
+            onSubmit={onPasswordSubmit}
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <input
+              type="password"
+              value={pw}
+              onChange={(e) => {
+                setPw(e.target.value);
+                if (pwStatus !== "idle") setPwStatus("idle");
+                if (pwMsg) setPwMsg("");
+              }}
+              placeholder="Password"
+              autoFocus
+              autoComplete="current-password"
+              style={{
+                border: "none",
+                borderBottom: "1px solid rgba(0,0,0,0.25)",
+                background: "transparent",
+                outline: "none",
+                fontSize: 11,
+                letterSpacing: "0.18em",
+                width: 130,
+                color: "rgba(0,0,0,0.75)",
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                color: "rgba(0,0,0,0.60)",
+                fontSize: 14,
+                lineHeight: 1,
+              }}
+              aria-label="Enter"
+            >
+              →
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowAccess(false);
+                setPw("");
+                setPwMsg("");
+                setPwStatus("idle");
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                color: "rgba(0,0,0,0.35)",
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+              aria-label="Close"
+              title="Close"
+            >
+              ×
+            </button>
+          </form>
+        )}
+
+        {pwMsg && (
+          <div
+            style={{
+              marginTop: 6,
+              fontSize: 10,
+              letterSpacing: "0.12em",
+              textTransform: "none",
+              color: "#b00020",
+              textAlign: "right",
+            }}
+          >
+            {pwMsg}
+          </div>
+        )}
+      </div>
+
       <div className={styles.csInner}>
         <div className={styles.logoWrap}>
           <Image
@@ -163,7 +325,9 @@ export default function ComingSoonPage() {
           />
         </div>
 
-        <p className={styles.sub}>We’re nearly ready. Join the waitlist to be first in.</p>
+        <p className={styles.sub}>
+          We’re nearly ready. Join the waitlist to be first in.
+        </p>
 
         <form onSubmit={onSubmit} className={styles.form}>
           <input
@@ -174,14 +338,24 @@ export default function ComingSoonPage() {
             className={styles.input}
             required
           />
-          <button type="submit" className={styles.button} disabled={status === "loading"}>
+          <button
+            type="submit"
+            className={styles.button}
+            disabled={status === "loading"}
+          >
             {status === "loading" ? "Joining…" : "Join"}
           </button>
         </form>
 
-        {message && <p className={status === "ok" ? styles.msgOk : styles.msgErr}>{message}</p>}
+        {message && (
+          <p className={status === "ok" ? styles.msgOk : styles.msgErr}>
+            {message}
+          </p>
+        )}
 
-        <p className={styles.footer}>© {new Date().getFullYear()} — All rights reserved.</p>
+        <p className={styles.footer}>
+          © {new Date().getFullYear()} — All rights reserved.
+        </p>
       </div>
     </main>
   );

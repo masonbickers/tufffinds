@@ -5,7 +5,8 @@ import { NextResponse } from "next/server";
 const ALLOW = [
   /^\/coming-soon(\/|$)/,
   /^\/link(\/|$)/,
-  /^\/duty-calculator(\/|$)/,   // ← ADD THIS
+  /^\/duty-calculator(\/|$)/,
+  /^\/version-1(\/|$)/,         // ✅ ADD THIS
   /^\/api(\/|$)/,
   /^\/_next\//,
   /^\/favicon\.ico$/,
@@ -13,7 +14,6 @@ const ALLOW = [
   /^\/sitemap\.xml$/,
   /\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|map|txt)$/
 ];
-
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -26,10 +26,9 @@ export function middleware(req: NextRequest) {
   // serve /coming-soon content *without* changing the URL
   const url = req.nextUrl.clone();
   url.pathname = "/coming-soon";
-  return NextResponse.rewrite(url);     // <- was redirect(...)
+  return NextResponse.rewrite(url);
 }
 
-// apply to everything; allow-list + rewrite controls behaviour
 export const config = {
   matcher: ["/:path*"],
 };
