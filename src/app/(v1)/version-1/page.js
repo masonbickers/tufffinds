@@ -133,6 +133,13 @@ export default function VersionOnePage() {
   const heroIn = mounted;
   const heroReveal = revealClass(heroIn);
 
+  const HOME_PATH = "/version-1";
+  const FAQ_PATH = "/version-1/faq";
+  const PRIVACY_PATH = "/version-1/privacy-policy";
+  const TERMS_PATH = "/version-1/terms";
+  const COOKIE_PATH = "/version-1/cookie-policy";
+  const DATA_SECURITY_PATH = "/version-1/data-security";
+
   const navItems = [
     ["Home", "#home"],
     ["About", "#about"],
@@ -686,7 +693,8 @@ export default function VersionOnePage() {
                 style={revealStyle(contact.inView, 160)}
               >
                 <a
-href="https://wa.me/447591207418?text=Hi%20Tufffinds"                  target="_blank"
+                  href="https://wa.me/447591207418?text=Hi%20Tufffinds"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between border-b border-[#40342F]/10 pb-4 transition hover:text-black"
                 >
@@ -813,12 +821,12 @@ href="https://wa.me/447591207418?text=Hi%20Tufffinds"                  target="_
 
                   <ul className="mt-4 space-y-2.5 text-sm text-white/70">
                     <li>
-                      <a href="/version-1#contact" className="transition hover:text-white">
+                      <a href={`${HOME_PATH}#contact`} className="transition hover:text-white">
                         Contact
                       </a>
                     </li>
                     <li>
-                      <a href="/version-1/faq" className="transition hover:text-white">
+                      <a href={FAQ_PATH} className="transition hover:text-white">
                         FAQ
                       </a>
                     </li>
@@ -828,7 +836,7 @@ href="https://wa.me/447591207418?text=Hi%20Tufffinds"                  target="_
                       </a>
                     </li>
                     <li>
-                      <a href="/version-1#about" className="transition hover:text-white">
+                      <a href={`${HOME_PATH}#about`} className="transition hover:text-white">
                         About Tufffinds
                       </a>
                     </li>
@@ -842,22 +850,22 @@ href="https://wa.me/447591207418?text=Hi%20Tufffinds"                  target="_
 
                   <ul className="mt-4 space-y-2.5 text-sm text-white/70">
                     <li>
-                      <a href="/version-1/privacy-policy" className="transition hover:text-white">
+                      <a href={PRIVACY_PATH} className="transition hover:text-white">
                         Privacy policy
                       </a>
                     </li>
                     <li>
-                      <a href="/version-1/terms" className="transition hover:text-white">
+                      <a href={TERMS_PATH} className="transition hover:text-white">
                         Terms of use
                       </a>
                     </li>
                     <li>
-                      <a href="/version-1/cookie-policy" className="transition hover:text-white">
+                      <a href={COOKIE_PATH} className="transition hover:text-white">
                         Cookie policy
                       </a>
                     </li>
                     <li>
-                      <a href="/version-1/data-security" className="transition hover:text-white">
+                      <a href={DATA_SECURITY_PATH} className="transition hover:text-white">
                         Data &amp; security
                       </a>
                     </li>
