@@ -120,8 +120,8 @@ export default function CreateOrderPage() {
             phoneNumber: data.phoneNumber ?? fallbackPhone,
             phoneNumberNormalized: data.phoneNumberNormalized ?? "",
             onboardingCompleted: Boolean(data.onboardingCompleted),
-            createdAt: normalizeTimestamp(data.createdAt),
-            updatedAt: normalizeTimestamp(data.updatedAt),
+            createdAt: normalizeTimestamp(data.createdAt as Parameters<typeof normalizeTimestamp>[0]),
+            updatedAt: normalizeTimestamp(data.updatedAt as Parameters<typeof normalizeTimestamp>[0]),
             profile: {
               ...emptyProfile,
               ...profile,
