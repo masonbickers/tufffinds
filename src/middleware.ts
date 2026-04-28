@@ -6,6 +6,7 @@ const ALLOW = [
   /^\/coming-soon(\/|$)/,
   /^\/link(\/|$)/,
   /^\/duty-calculator(\/|$)/,
+  /^\/admin(\/|$)/,
   /^\/version-1(\/|$)/,         // ✅ ADD THIS
   /^\/api(\/|$)/,
   /^\/_next\//,
