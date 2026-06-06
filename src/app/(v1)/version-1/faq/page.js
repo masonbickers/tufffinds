@@ -103,15 +103,11 @@ export default function FAQPage() {
         items: [
           {
             q: "How does Tufffinds work?",
-            a: "You send a brief with the item, size, budget range, deadline and references. We source options through our network and return a tight shortlist. Once you approve, we help coordinate purchase and delivery.",
-          },
-          {
-            q: "What should I include in my brief?",
-            a: "Include sizes, colour preferences, budget range, deadline, location and any links or screenshots. If you’re unsure, tell us the overall direction and we’ll guide the rest.",
+            a: "You send a brief of the item you are looking for, including size, any budget range, deadline and references that may help the sourcing. We source based on your request. Once found and approved by you, we go ahead with payment and coordinate delivery.",
           },
           {
             q: "Do you only source luxury items?",
-            a: "Our focus is premium, luxury and hard-to-find pieces, but we’ll always work from the brief. If a request is not the right fit, we’ll let you know quickly.",
+            a: "Our main focus is premium, luxury and hard to find pieces, but please don’t hesitate to message us about anything. If a request sits outside our usual scope, we’ll let you know right away.",
           },
         ],
       },
@@ -120,15 +116,15 @@ export default function FAQPage() {
         items: [
           {
             q: "Can you source sold-out or rare items?",
-            a: "Yes. We use trusted sources and relationships to surface pieces that rarely reach the open market. Availability is never guaranteed, but we’ll always be transparent.",
+            a: "Yes, absolutely. We use trusted and verified sources and a global network to find these pieces. Sometimes it can take longer than expected due to rarity or high demand, however we will always communicate this with you.",
           },
           {
             q: "How do you handle authenticity?",
-            a: "We prioritise vetted sources, receipts and traceability where possible. If you would like third-party authentication, we can advise on suitable options before purchase.",
+            a: "Sourced pieces are found through trusted boutiques, specialist suppliers and verified contacts. We carefully review each item before purchase to help ensure quality, condition and authenticity.",
           },
           {
             q: "Can you source internationally?",
-            a: "Yes. We source globally and coordinate delivery depending on the item and destination. Duties or taxes may apply and will be discussed where relevant.",
+            a: "We can source globally and coordinate delivery depending on the item and delivery address. Duties and taxes may apply, which will always be mentioned before going ahead with payment.",
           },
         ],
       },
@@ -137,15 +133,15 @@ export default function FAQPage() {
         items: [
           {
             q: "How much does it cost to use your service?",
-            a: "It depends on the request. We’ll confirm any service fees and item pricing before you commit. Nothing is purchased without your approval.",
+            a: "Due to the bespoke nature of our service, pricing reflects current market availability, the rarity of the piece, and the sourcing logistics involved. Each quote is tailored individually depending on the item, size, condition, timeline and where it can be sourced from.",
           },
           {
             q: "Do you charge a deposit?",
-            a: "For certain high-demand requests, we may request a deposit or service fee to begin sourcing. If so, this will be confirmed upfront.",
+            a: "For a service or high demand request, we may request a deposit or service fee before we begin. If so, this will be confirmed upfront.",
           },
           {
             q: "Are duties and taxes included?",
-            a: "If items ship internationally, duties and taxes may apply depending on destination and carrier handling. We’ll flag this early and help you understand what to expect.",
+            a: "For international orders, please note that any customs fees, import duties, taxes, or additional charges are the responsibility of the client. These costs are set by the destination country and are not included in our service or shipping fees.",
           },
         ],
       },
@@ -154,15 +150,15 @@ export default function FAQPage() {
         items: [
           {
             q: "How long does sourcing take?",
-            a: "Some briefs can be answered the same day, while others take longer depending on rarity and timeline. We’ll give you a realistic expectation after reviewing your request.",
+            a: "Some requests can be answered and offered on the same day, while others may take longer due to rarity and high demand. We will give you a realistic expectation after reviewing your timeline.",
           },
           {
             q: "Do you offer urgent sourcing?",
-            a: "Yes. If you have a deadline, tell us in the brief. We’ll prioritise accordingly and be honest about what is possible.",
+            a: "Yes. If you have a deadline, please always mention it to us. This way, we can do everything possible to help get your item to you on time.",
           },
           {
             q: "Can you ship directly to me?",
-            a: "Often, yes. In some cases, items may route via us for checks or coordination. We’ll choose the cleanest route for the brief.",
+            a: "Yes, items are usually shipped to the client’s chosen address. If any changes are needed, we will let you know beforehand.",
           },
         ],
       },
@@ -171,15 +167,22 @@ export default function FAQPage() {
         items: [
           {
             q: "Can I return items?",
-            a: "Returns depend on the seller, source and item type. We’ll clarify the return position before purchase where possible, but rare or sold-out pieces are often final sale.",
+            a: (
+              <>
+                <span className="block">
+                  Due to the bespoke nature of luxury sourcing, all sales are strictly final. Once
+                  an item has been secured, we are unable to offer refunds, returns or exchanges.
+                </span>
+                <span className="mt-4 block">
+                  The only exception is if an item arrives to us damaged or faulty before being sent
+                  to you, and we are unable to source a suitable replacement.
+                </span>
+              </>
+            ),
           },
           {
             q: "What if I change my mind after approving?",
-            a: "If an order has not been placed, we can stop. If it has already been placed, cancellation depends on the seller’s terms and may not be possible.",
-          },
-          {
-            q: "What if something arrives damaged?",
-            a: "Tell us immediately. We’ll support the claim process with the courier or source where applicable. If insurance was added, that will help.",
+            a: "Full payment is required to secure your item. Once you confirm your purchase, please complete payment promptly, as availability can change quickly. Once payment has been made and confirmed, cancellations may not be possible due to the real time nature of sourcing.",
           },
         ],
       },
@@ -283,7 +286,7 @@ export default function FAQPage() {
       </header>
 
       {/* HERO */}
-      <section className="relative flex min-h-[72svh] items-center overflow-hidden bg-[#EFE8DE] pt-20 sm:min-h-[78svh]">
+      <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#EFE8DE] pt-20">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.34)_34%,rgba(239,232,222,0)_68%)]" />
           <div className="absolute bottom-[-24%] left-[-12%] h-[520px] w-[520px] rounded-full bg-[#D8C7B8]/35 blur-[90px]" />
@@ -306,8 +309,7 @@ export default function FAQPage() {
             </p>
 
             <h1 className={cx(ui.h1, baseReveal, revealClass)} style={revealStyle(160)}>
-              Questions, answered
-              <span className="block text-[#40342F]/80">calmly and clearly.</span>
+              Most Common Questions
             </h1>
 
             <p
@@ -338,23 +340,11 @@ export default function FAQPage() {
               </a>
 
               <a
-                href="mailto:hello@tufffinds.com"
-                className="min-h-12 rounded-full border border-[#40342F]/15 bg-white/35 px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#40342F]/85 backdrop-blur transition hover:border-[#40342F]/30 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
+                href="mailto:info@tufffinds.com"
+                className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
-                Email support
+                Email us
               </a>
-            </div>
-
-            <div
-              className={cx(
-                "mt-9 flex flex-col justify-center gap-2 text-[10px] tracking-[0.22em] uppercase text-black/55 sm:mt-12 sm:flex-row sm:gap-10 sm:text-[11px] sm:tracking-[0.28em]",
-                baseReveal,
-                revealClass
-              )}
-              style={revealStyle(400)}
-            >
-              <span>London</span>
-              <span>Global network</span>
             </div>
           </div>
         </div>
@@ -442,13 +432,14 @@ export default function FAQPage() {
             <p className={cx("mb-5 text-black/50 sm:mb-6", ui.eyebrow)}>Still unsure?</p>
 
             <h2 className={ui.h2}>
-              Send your brief.
-              <span className={ui.h2Split}>We’ll reply personally.</span>
+              Send your request,
+              <span className={ui.h2Split}>we will reply personally.</span>
             </h2>
 
             <p className={cx("mx-auto mt-6 max-w-2xl", ui.body)}>
-              Share the item, size, budget range and timeline. We’ll confirm next steps and let you know
-              what is possible.
+              Share your request with us, including the item, size, budget range and image.
+              We will confirm the next steps and availability. If you have any further questions,
+              don’t hesitate to ask.
             </p>
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
@@ -460,15 +451,11 @@ export default function FAQPage() {
               </a>
 
               <a
-                href="mailto:hello@tufffinds.com"
-                className="min-h-12 rounded-full border border-[#40342F]/15 bg-white/35 px-9 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-[#40342F]/85 backdrop-blur transition hover:border-[#40342F]/30 active:scale-[0.99]"
+                href="mailto:info@tufffinds.com"
+                className="min-h-12 rounded-full bg-[#40342F] px-9 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99]"
               >
-                Email support
+                Email us
               </a>
-            </div>
-
-            <div className="mt-10 text-[10px] uppercase tracking-[0.24em] text-black/45 sm:text-[11px] sm:tracking-[0.28em]">
-              London · Global sourcing
             </div>
           </div>
         </div>
@@ -484,7 +471,7 @@ export default function FAQPage() {
                 alt="Tufffinds"
                 width={220}
                 height={56}
-                className="h-6 w-auto select-none invert brightness-[1.05]"
+                className="h-6 w-auto select-none [filter:brightness(0)_saturate(100%)_invert(92%)_sepia(12%)_saturate(243%)_hue-rotate(337deg)_brightness(106%)_contrast(90%)]"
               />
 
               <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">
@@ -529,8 +516,8 @@ export default function FAQPage() {
                       </a>
                     </li>
                     <li>
-                      <a href="mailto:hello@tufffinds.com" className="transition hover:text-white">
-                        Email support
+                      <a href="mailto:info@tufffinds.com" className="transition hover:text-white">
+                        Email us
                       </a>
                     </li>
                     <li>
@@ -557,16 +544,6 @@ export default function FAQPage() {
                         Terms of use
                       </a>
                     </li>
-                    <li>
-                      <a href="/cookie-policy" className="transition hover:text-white">
-                        Cookie policy
-                      </a>
-                    </li>
-                    <li>
-                      <a href="/data-security" className="transition hover:text-white">
-                        Data &amp; security
-                      </a>
-                    </li>
                   </ul>
                 </div>
               </div>
@@ -576,7 +553,6 @@ export default function FAQPage() {
           <div className="border-t border-white/10">
             <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-4 text-[10px] uppercase tracking-[0.2em] text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
               <p>© {new Date().getFullYear()} Tufffinds — All rights reserved</p>
-              <p className="hidden sm:block">London · Global sourcing</p>
             </div>
           </div>
         </div>

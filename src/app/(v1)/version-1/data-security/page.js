@@ -28,7 +28,7 @@ export default function DataSecurityPage() {
   );
 
   const brand = "Tufffinds";
-  const supportEmail = "hello@tufffinds.com";
+  const supportEmail = "info@tufffinds.com";
 
   return (
     <main className="min-h-screen bg-[#F8F7F3] text-[#121212]">
@@ -183,7 +183,7 @@ export default function DataSecurityPage() {
           width={220}
           height={56}
           quality={100}
-          className="h-6 w-auto invert brightness-[1.05] select-none"
+          className="h-6 w-auto select-none [filter:brightness(0)_saturate(100%)_invert(92%)_sepia(12%)_saturate(243%)_hue-rotate(337deg)_brightness(106%)_contrast(90%)]"
         />
 
         <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">
@@ -232,7 +232,7 @@ export default function DataSecurityPage() {
               </li>
               <li>
                 <a
-                  href="mailto:hello@tufffinds.com"
+                  href="mailto:info@tufffinds.com"
                   className="transition hover:text-white"
                 >
                   Email support
@@ -269,22 +269,6 @@ export default function DataSecurityPage() {
                   className="transition hover:text-white"
                 >
                   Terms of use
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/version-1/cookie-policy"
-                  className="transition hover:text-white"
-                >
-                  Cookie policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/version-1/data-security"
-                  className="transition hover:text-white"
-                >
-                  Data &amp; security
                 </a>
               </li>
             </ul>

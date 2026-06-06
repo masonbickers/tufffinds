@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes tf-icon-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+.tf-icon-marquee {
+  animation: tf-icon-marquee 28s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-icon-marquee {
+    animation: none;
+  }
+}

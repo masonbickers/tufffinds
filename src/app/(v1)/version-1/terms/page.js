@@ -27,7 +27,7 @@ export default function TermsOfUsePage() {
   );
 
   const brand = "Tufffinds";
-  const supportEmail = "hello@tufffinds.com";
+  const supportEmail = "info@tufffinds.com";
 
   return (
     <main className="min-h-screen bg-[#F8F7F3] text-[#121212]">
@@ -97,7 +97,7 @@ export default function TermsOfUsePage() {
 
             <h2 className={ui.h2}>1. About us</h2>
             <p>
-              {brand} is a personal shopping and sourcing studio providing
+              {brand} is a personal shopping and sourcing service providing
               discretionary sourcing, styling, and coordination services.
               Information on this website is provided for general guidance only.
             </p>
@@ -187,7 +187,7 @@ export default function TermsOfUsePage() {
           width={220}
           height={56}
           quality={100}
-          className="h-6 w-auto invert brightness-[1.05] select-none"
+          className="h-6 w-auto select-none [filter:brightness(0)_saturate(100%)_invert(92%)_sepia(12%)_saturate(243%)_hue-rotate(337deg)_brightness(106%)_contrast(90%)]"
         />
 
         <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">
@@ -236,7 +236,7 @@ export default function TermsOfUsePage() {
               </li>
               <li>
                 <a
-                  href="mailto:hello@tufffinds.com"
+                  href="mailto:info@tufffinds.com"
                   className="transition hover:text-white"
                 >
                   Email support
@@ -273,22 +273,6 @@ export default function TermsOfUsePage() {
                   className="transition hover:text-white"
                 >
                   Terms of use
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/version-1/cookie-policy"
-                  className="transition hover:text-white"
-                >
-                  Cookie policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/version-1/data-security"
-                  className="transition hover:text-white"
-                >
-                  Data &amp; security
                 </a>
               </li>
             </ul>

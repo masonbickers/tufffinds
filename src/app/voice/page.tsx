@@ -349,8 +349,8 @@ export default function VoicePage() {
                 <a className="ink" href="mailto:ginevra@tufffinds.com">
                   ginevra@tufffinds.com
                 </a>
-                <a className="ink" href="mailto:hello@tufffinds.com">
-                  General: hello@tufffinds.com
+                <a className="ink" href="mailto:info@tufffinds.com">
+                  General: info@tufffinds.com
                 </a>
                 <a className="ink" href="https://instagram.com" target="_blank" rel="noreferrer">
                   Instagram ↗
@@ -359,7 +359,7 @@ export default function VoicePage() {
 
               <div className="footnote">
                 Prefer WhatsApp or a quick call?{" "}
-                <a className="ink" href="mailto:hello@tufffinds.com">
+                <a className="ink" href="mailto:info@tufffinds.com">
                   Email us
                 </a>{" "}
                 and we’ll send a direct line.

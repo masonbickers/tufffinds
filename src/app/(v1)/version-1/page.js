@@ -17,8 +17,6 @@ function SectionDivider() {
   );
 }
 
-const SHOW_ABOUT_SECTION = false;
-
 /* ───────────────────────────────────────────
    Scroll reveal — IntersectionObserver
 ─────────────────────────────────────────── */
@@ -155,8 +153,6 @@ export default function VersionOnePage() {
   const FAQ_PATH = "/version-1/faq";
   const PRIVACY_PATH = "/version-1/privacy-policy";
   const TERMS_PATH = "/version-1/terms";
-  const COOKIE_PATH = "/version-1/cookie-policy";
-  const DATA_SECURITY_PATH = "/version-1/data-security";
 
   const handleContactChange = (field) => (event) => {
     setContactForm((current) => ({
@@ -243,10 +239,19 @@ export default function VersionOnePage() {
   };
 
   const navItems = [
-    ["Home", "#home"],
-    ["Services", "#services"],
-    ["Contact", "#contact"],
-    ...(SHOW_ABOUT_SECTION ? [["About", "#about"]] : []),
+    ["Home", `${HOME_PATH}#home`],
+    ["Services", `${HOME_PATH}#services`],
+    ["Process", `${HOME_PATH}#process`],
+    ["About", `${HOME_PATH}#about`],
+    ["Contact", `${HOME_PATH}#contact`],
+  ];
+
+  const iconStripItems = [
+    { label: "Chanel", src: "/CHANEL.png" },
+    { label: "Goyard", src: "/GOYARD.png" },
+    { label: "Sunglasses", src: "/SUNGLASSES.png" },
+    { label: "Hermes", src: "/HERMES.png" },
+    { label: "Manolo", src: "/MANOLO 2.png" },
   ];
 
   return (
@@ -264,7 +269,7 @@ export default function VersionOnePage() {
             scrolled || mobileMenuOpen ? "border-b border-[#40342F]/10" : ""
           )}
         >
-          <a href="#home" aria-label="Tufffinds home" onClick={() => setMobileMenuOpen(false)}>
+          <a href={`${HOME_PATH}#home`} aria-label="Tufffinds home" onClick={() => setMobileMenuOpen(false)}>
             <Image
               src="/finallogobrown.png"
               alt="Tufffinds"
@@ -285,7 +290,7 @@ export default function VersionOnePage() {
             </nav>
 
             <a
-              href="#contact"
+              href={`${HOME_PATH}#contact`}
               className="rounded-full border border-[#40342F]/30 px-5 py-2.5 text-[10px] font-semibold tracking-[0.22em] uppercase text-[#40342F] transition hover:border-[#40342F]/60"
             >
               Enquire
@@ -373,7 +378,7 @@ export default function VersionOnePage() {
             ))}
 
             <a
-              href="#contact"
+              href={`${HOME_PATH}#contact`}
               className="mt-8 min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99]"
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -398,38 +403,85 @@ export default function VersionOnePage() {
         </div>
 
         <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl items-center justify-center px-5 sm:px-6 lg:px-8">
-          <div className="max-w-4xl pb-10 pt-20 text-center sm:pb-16 sm:pt-32">
+          <Image
+            src="/icon.png"
+            alt=""
+            width={620}
+            height={620}
+            priority
+            className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-auto w-[340px] -translate-x-1/2 -translate-y-[72%] opacity-50 sm:w-[500px] lg:w-[620px]"
+          />
+          <div className="relative z-10 flex max-w-4xl translate-y-[22vh] flex-col items-center gap-8 pb-10 pt-20 text-center sm:gap-9 sm:pb-16 sm:pt-32">
+            <h1 className={cx("flex justify-center", heroReveal)} style={revealStyle(heroIn, 80)}>
+              <Image
+                src="/the-ones-connected2.png"
+                alt="The Ones Connected"
+                width={2782}
+                height={100}
+                priority
+                className="h-auto w-[min(92vw,760px)] [filter:brightness(0)_saturate(100%)_invert(18%)_sepia(12%)_saturate(770%)_hue-rotate(334deg)_brightness(92%)_contrast(88%)]"
+              />
+            </h1>
+
             <p
               className={cx(
-                "mx-auto mb-5 max-w-[21rem] text-[10px] leading-[1.7] tracking-[0.16em] uppercase text-black/55 sm:mb-6 sm:max-w-none sm:text-[11px] sm:tracking-[0.3em]",
+                "mx-auto max-w-[21rem] text-[10px] leading-[1.7] tracking-[0.16em] uppercase text-black/55 sm:max-w-none sm:text-[11px] sm:tracking-[0.3em]",
                 heroReveal
               )}
-              style={revealStyle(heroIn, 80)}
+              style={revealStyle(heroIn, 160)}
             >
               Personal Shopping • Wardrobe Edits • Sourcing • Styling
             </p>
 
             <div
               className={cx(
-                "mt-8 flex flex-col justify-center gap-3 sm:mt-11 sm:flex-row sm:gap-4",
+                "flex flex-col justify-center gap-3 sm:flex-row sm:gap-4",
                 heroReveal
               )}
-              style={revealStyle(heroIn, 160)}
+              style={revealStyle(heroIn, 240)}
             >
               <a
-                href="#contact"
+                href={`${HOME_PATH}#contact`}
                 className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#EFE8DE] transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
                 Request sourcing
               </a>
 
               <a
-                href="#services"
+                href={`${HOME_PATH}#services`}
                 className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#EFE8DE] transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
                 View services
               </a>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ICON STRIP */}
+      <section aria-label="Sourcing categories" className="overflow-hidden bg-[#F8F7F3] py-8 sm:py-10">
+        <div className="py-5 sm:py-6">
+          <div className="tf-icon-marquee flex w-max items-center gap-8 sm:gap-12">
+            {[...iconStripItems, ...iconStripItems, ...iconStripItems].map((item, idx) => (
+              <div
+                key={`${item.label}-${idx}`}
+                className="flex h-24 w-24 shrink-0 items-center justify-center p-1 sm:h-28 sm:w-28"
+              >
+                {item.src ? (
+                  <Image
+                    src={item.src}
+                    alt={item.label}
+                    width={96}
+                    height={96}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <span className="font-serif text-[18px] uppercase tracking-[0.08em] text-[#40342F] sm:text-[20px]">
+                    {item.label}
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -441,7 +493,7 @@ export default function VersionOnePage() {
         <div
           ref={services.ref}
           className={cx(
-            "mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-5 sm:px-6 md:grid-cols-12 md:gap-16 lg:px-8",
+            "mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 sm:px-6 md:grid-cols-12 md:gap-16 lg:px-8",
             ui.sectionY,
             revealClass(services.inView)
           )}
@@ -456,26 +508,18 @@ export default function VersionOnePage() {
             </p>
 
             <h2 className={ui.h2} style={revealStyle(services.inView, 120)}>
-              Rare pieces.
-              <span className={ui.h2Split}>Refined wardrobes.</span>
+              Helping you source,
+              <span className={ui.h2Split}>style and refresh your wardrobe.</span>
             </h2>
-
-            <p
-              className={cx("mt-5 max-w-xl sm:mt-6", ui.bodyLarge)}
-              style={revealStyle(services.inView, 200)}
-            >
-              From sold-out accessories to event looks and everyday wardrobe gaps, we source with clarity:
-              what is worth considering, what to avoid, and where timing or price makes sense.
-            </p>
 
             {/* Mobile image */}
             <div className="mt-9 md:hidden" style={revealStyle(services.inView, 240)}>
               <div className="relative aspect-[4/4.7] overflow-hidden rounded-[28px] bg-[#40342F]/5">
                 <Image
-                  src="/gina-ginny.jpg"
-                  alt="Gina and Ginny — Tufffinds sourcing and personal shopping"
+                  src="/services.jpg"
+                  alt="Tufffinds services"
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
                   sizes="100vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
@@ -487,17 +531,37 @@ export default function VersionOnePage() {
                 {
                   n: "01",
                   h: "Personal Shopping and Sourcing",
-                  p: "Hard-to-find bags, shoes, accessories and ready-to-wear sourced through trusted private, retail and resale channels.",
+                  p: "Searching for a sold out or hard to find piece? Tufffinds sources through a trusted global network to help you secure the item you’ve been looking for.",
                 },
                 {
                   n: "02",
                   h: "Styling Edits / In-Person Styling",
-                  p: "Considered pieces for travel, events, seasonal updates and everyday wardrobes — edited to your style, size and budget.",
+                  p: "Need help deciding what to wear? Whether your wardrobe feels full but you keep reaching for the same pieces, we can create a digital styling edit or work with you in person for a more refined styling session.",
+                  p2: (
+                    <>
+                      To enquire about this service, please send us a{" "}
+                      <a
+                        href="https://www.tufffinds.com/link?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGnBfazMQHjtMVXLMbMYQSWDc0F3q7i82ZT-ZnHN4B1CRJaFQq6tCLUVZQyY30_aem_to6S4mLhbMtYxijihS2xIw"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline decoration-[#40342F]/30 underline-offset-4 transition hover:text-[#40342F]"
+                      >
+                        message
+                      </a>
+                      .
+                    </>
+                  ),
                 },
                 {
                   n: "03",
                   h: "Wardrobe Refresh",
-                  p: "We handle checks, approvals, purchase coordination, shipping updates and follow-through with discretion.",
+                  p: (
+                    <>
+                      Whether your wardrobe needs a tidy, a reset or a full refresh, we help
+                      re-organise, edit and refine your pieces so your wardrobe feels more
+                      considered and easier to style.
+                    </>
+                  ),
                 },
               ].map((s, idx) => (
                 <article
@@ -508,15 +572,16 @@ export default function VersionOnePage() {
                   <div className="grid grid-cols-[44px_1fr] gap-5 sm:grid-cols-[56px_1fr] sm:gap-7">
                     <div className={cx("pt-1 text-black/40", ui.eyebrow)}>{s.n}</div>
 
-                    <div className="max-w-md">
+                    <div className="max-w-2xl">
                       <div className="flex items-baseline gap-4">
-                        <h3 className="font-serif text-[24px] leading-tight tracking-tight text-[#40342F] sm:text-[28px]">
+                        <h3 className="whitespace-nowrap font-serif text-[24px] leading-tight tracking-tight text-[#40342F] sm:text-[28px]">
                           {s.h}
                         </h3>
                         <span className="hidden h-px w-10 bg-[#40342F]/10 transition-all duration-300 group-hover:w-16 sm:block" />
                       </div>
 
                       <p className={cx("mt-3", ui.body)}>{s.p}</p>
+                      {s.p2 ? <p className={cx("mt-3", ui.body)}>{s.p2}</p> : null}
                     </div>
                   </div>
                 </article>
@@ -529,21 +594,21 @@ export default function VersionOnePage() {
             className="hidden md:order-2 md:col-span-6 md:col-start-7 md:block"
             style={revealStyle(services.inView, 180)}
           >
-            <div className="md:sticky md:top-28">
+            <div>
               <div className="relative aspect-[4/5] max-h-[680px] overflow-hidden rounded-[32px] bg-[#40342F]/5">
                 <Image
-                  src="/gina-ginny.jpg"
-                  alt="Gina and Ginny — Tufffinds sourcing and personal shopping"
+                  src="/services.jpg"
+                  alt="Tufffinds services"
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
                   sizes="50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
               </div>
 
               <div className="mt-5 flex items-center justify-between border-t border-[#40342F]/10 pt-4 text-[10px] uppercase tracking-[0.22em] text-black/45">
-                <span>Private sourcing</span>
-                <span>London</span>
+                <span>Based in London</span>
+                <span>Global Network</span>
               </div>
             </div>
           </div>
@@ -573,15 +638,15 @@ export default function VersionOnePage() {
               </p>
 
               <h2 className={cx(ui.h2, "max-w-xl")} style={revealStyle(process.inView, 120)}>
-                From brief to delivery —
-                <span className={ui.h2Split}>handled quietly.</span>
+                A simple five step process,
+                <span className={ui.h2Split}>from brief to delivery.</span>
               </h2>
 
               <p
                 className={cx("mt-5 max-w-xl sm:mt-6", ui.body)}
                 style={revealStyle(process.inView, 190)}
               >
-                A simple, considered route from first message to final delivery — with clear updates at each stage.
+                Tell us what you need, and we’ll guide the search, quote, payment and delivery from start to finish.
               </p>
             </div>
 
@@ -669,6 +734,68 @@ export default function VersionOnePage() {
         </div>
       </section>
 
+      {/* ABOUT */}
+      <section id="about" className="scroll-mt-24 bg-[#F8F7F3]">
+        <SectionDivider />
+
+        <div
+          ref={founders.ref}
+          className={cx(
+            "mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-5 py-14 sm:px-6 sm:py-20 md:grid-cols-12 md:gap-16 md:py-20 lg:px-8 lg:py-24",
+            revealClass(founders.inView)
+          )}
+        >
+          <div className="md:col-span-6" style={revealStyle(founders.inView, 80)}>
+            <div className="md:sticky md:top-28">
+              <div className="relative aspect-[4/4.7] max-h-[680px] overflow-hidden rounded-[28px] bg-[#40342F]/5 sm:aspect-[4/5] md:rounded-[32px]">
+                <Image
+                  src="/tufffinds-shoot.jpg"
+                  alt="Gina and Ginevra — founders of Tufffinds"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-6 md:col-start-7" style={revealStyle(founders.inView, 140)}>
+            <p className={cx("mb-5 text-black/50 sm:mb-6", ui.eyebrow)}>About</p>
+
+            <h2 className={ui.h2}>
+              Founders
+            </h2>
+
+            <div className={cx("mt-7 max-w-xl space-y-5 sm:mt-8 sm:space-y-6", ui.body)}>
+              <p>
+                Gina & Ginevra, the founders behind Tufffinds.
+              </p>
+
+              <p>
+                What started as a conversation about how hard it can be to find those one of a kind
+                items before it&apos;s gone, quickly turned into a mission to make discovering the
+                toughest finds effortless.
+              </p>
+
+              <p>
+                Based in London but available for everyone anywhere, we bring years of experience
+                in personal shopping, styling, and sourcing.
+              </p>
+
+              <p>
+                At its heart, Tufffinds is about connection between people, pieces, and stories.
+                Where the rare finds become reachable.
+              </p>
+            </div>
+
+            <div className="mt-8 text-[10px] uppercase tracking-[0.28em] text-black/45 sm:text-[11px] sm:tracking-[0.32em]">
+              Gina &nbsp;·&nbsp; Ginevra
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CONTACT */}
       <section id="contact" className="scroll-mt-24 bg-[#F8F7F3]">
         <SectionDivider />
@@ -693,8 +820,8 @@ export default function VersionOnePage() {
 
               <div className={cx("mt-6 max-w-xl space-y-5 sm:mt-8", ui.body)}>
                 <p>
-                  Start with the item, size, budget, preferred condition and timeline. Screenshots,
-                  links or references are always helpful.
+                  Start by sharing the item, size and any timing you need it for. Photos,
+                  screenshots, links or references are always helpful.
                 </p>
 
                 <p className="text-black/55">
@@ -727,7 +854,7 @@ export default function VersionOnePage() {
                 </a>
 
                 <a
-                  href="mailto:hello@tufffinds.com?subject=Tufffinds%20Sourcing%20Request&body=Hi%20Tufffinds%2C%0A%0AItem%3A%0ASize%3A%0ABudget%20range%3A%0ATimeline%3A%0ALinks%2FRefs%3A%0A%0AThank%20you!"
+                  href="mailto:info@tufffinds.com?subject=Tufffinds%20Sourcing%20Request&body=Hi%20Tufffinds%2C%0A%0AItem%3A%0ASize%3A%0ABudget%20range%3A%0ATimeline%3A%0ALinks%2FRefs%3A%0A%0AThank%20you!"
                   className="flex items-center justify-between border-b border-[#40342F]/10 pb-4 transition hover:text-black"
                 >
                   <span>Email</span>
@@ -827,74 +954,6 @@ export default function VersionOnePage() {
         </div>
       </section>
 
-      {SHOW_ABOUT_SECTION ? (
-        <>
-          {/* ABOUT */}
-          <section id="about" className="scroll-mt-24 bg-[#F8F7F3]">
-            <SectionDivider />
-
-            <div
-              ref={founders.ref}
-              className={cx(
-                "mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-5 sm:px-6 md:grid-cols-12 md:gap-16 lg:px-8",
-                ui.sectionY,
-                revealClass(founders.inView)
-              )}
-            >
-              <div className="md:col-span-6" style={revealStyle(founders.inView, 120)}>
-                <div className="md:sticky md:top-24">
-                  <div className="relative aspect-[4/4.7] max-h-[680px] overflow-hidden rounded-[28px] bg-[#40342F]/5 sm:aspect-[4/5] md:rounded-[32px]">
-                    <Image
-                      src="/tufffinds-shoot.jpg"
-                      alt="Gina and Ginevra — founders of Tufffinds"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
-                  </div>
-
-                  <div className="mt-5 hidden items-center justify-between border-t border-[#40342F]/10 pt-4 text-[10px] uppercase tracking-[0.22em] text-black/45 md:flex">
-                    <span>Gina</span>
-                    <span>Ginevra</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="md:col-span-6 md:col-start-7" style={revealStyle(founders.inView, 60)}>
-                <p className={cx("mb-5 text-black/50 sm:mb-6", ui.eyebrow)}>About</p>
-
-                <h2 className={ui.h2}>
-                  Tufffinds,
-                  <span className={ui.h2Split}>founded by Gina and Ginevra.</span>
-                </h2>
-
-                <div className={cx("mt-7 max-w-xl space-y-5 sm:mt-8 sm:space-y-6", ui.body)}>
-                  <p>
-                    Founded by Gina and Ginevra, Tufffinds brings together luxury client experience,
-                    editorial taste and a trusted international sourcing network.
-                  </p>
-
-                  <p>
-                    Their role is to filter clearly: what is worth considering, what to avoid, and
-                    where price, condition or timing makes sense.
-                  </p>
-
-                  <p>
-                    The result is personal shopping that feels calm, discreet and genuinely useful —
-                    whether you are sourcing one rare piece or refining a wider wardrobe.
-                  </p>
-                </div>
-
-                <div className="mt-8 text-[10px] uppercase tracking-[0.28em] text-black/45 sm:text-[11px] sm:tracking-[0.32em]">
-                  Gina &nbsp;·&nbsp; Ginevra
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
-      ) : null}
-
       {/* FOOTER */}
       <footer ref={footer.ref} className={cx("bg-[#40342F] text-white", revealClass(footer.inView))}>
         <div className="border-t border-white/10">
@@ -905,7 +964,7 @@ export default function VersionOnePage() {
                 alt="Tufffinds"
                 width={220}
                 height={56}
-                className="h-6 w-auto select-none brightness-0 invert"
+                className="h-6 w-auto select-none [filter:brightness(0)_saturate(100%)_invert(92%)_sepia(12%)_saturate(243%)_hue-rotate(337deg)_brightness(106%)_contrast(90%)]"
               />
 
               <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">
@@ -950,17 +1009,15 @@ export default function VersionOnePage() {
                       </a>
                     </li>
                     <li>
-                      <a href="mailto:hello@tufffinds.com" className="transition hover:text-white">
+                      <a href="mailto:info@tufffinds.com" className="transition hover:text-white">
                         Email support
                       </a>
                     </li>
-                    {SHOW_ABOUT_SECTION ? (
-                      <li>
-                        <a href={`${HOME_PATH}#about`} className="transition hover:text-white">
-                          About Tufffinds
-                        </a>
-                      </li>
-                    ) : null}
+                    <li>
+                      <a href={`${HOME_PATH}#about`} className="transition hover:text-white">
+                        About Tufffinds
+                      </a>
+                    </li>
                   </ul>
                 </div>
 
@@ -978,16 +1035,6 @@ export default function VersionOnePage() {
                     <li>
                       <a href={TERMS_PATH} className="transition hover:text-white">
                         Terms of use
-                      </a>
-                    </li>
-                    <li>
-                      <a href={COOKIE_PATH} className="transition hover:text-white">
-                        Cookie policy
-                      </a>
-                    </li>
-                    <li>
-                      <a href={DATA_SECURITY_PATH} className="transition hover:text-white">
-                        Data &amp; security
                       </a>
                     </li>
                   </ul>

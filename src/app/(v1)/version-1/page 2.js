@@ -884,22 +884,6 @@ export default function VersionOnePage() {
                         Terms of use
                       </a>
                     </li>
-                    <li>
-                      <a
-                        href="/version-1/cookie-policy"
-                        className="transition hover:text-white"
-                      >
-                        Cookie policy
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/version-1/data-security"
-                        className="transition hover:text-white"
-                      >
-                        Data &amp; security
-                      </a>
-                    </li>
                   </ul>
                 </div>
               </div>
