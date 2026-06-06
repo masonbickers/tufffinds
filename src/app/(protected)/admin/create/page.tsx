@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
-import type { AdminClient, ClientProfile } from "../admin-types";
+import type { AdminClient, ClientProfile, FirestoreTimestampValue } from "../admin-types";
 import { getEmptyProfile, normalizeTimestamp } from "../admin-utils";
 
 type Currency = "GBP" | "EUR" | "USD";
