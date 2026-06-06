@@ -231,9 +231,6 @@ export default function VersionOnePage() {
               <a href="#home" className="transition hover:text-black">
                 Home
               </a>
-              <a href="#about" className="transition hover:text-black">
-                About
-              </a>
               <a href="#services" className="transition hover:text-black">
                 Services
               </a>
@@ -286,16 +283,6 @@ export default function VersionOnePage() {
               Personal Shopping • Wardrobe Edits • Sourcing • Styling
             </p>
 
-            <h1
-              className={revealClass(heroIn, ui.h1)}
-              style={revealStyle(heroIn, 160)}
-            >
-              Find the unfindable —
-              <span className="block text-black/80">
-                with the ones connected.
-              </span>
-            </h1>
-
             <p
               className={revealClass(
                 heroIn,
@@ -340,61 +327,6 @@ export default function VersionOnePage() {
               <span>London</span>
               <span>Global network</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About */}
-      <section id="about" className="relative overflow-hidden bg-[#F8F7F3]">
-        <div
-          ref={about.ref}
-          className={cn(ui.container, ui.sectionY, "relative text-center")}
-        >
-          <div className="pointer-events-none absolute inset-0 flex justify-center">
-            <Image
-              src="/icon.png"
-              alt=""
-              width={380}
-              height={380}
-              quality={100}
-              className="mt-10 w-[260px] opacity-[0.15] md:w-[320px] lg:w-[380px]"
-            />
-          </div>
-
-          <p
-            className={revealClass(
-              about.inView,
-              cn("relative z-10 mb-6 text-black/50", ui.eyebrow)
-            )}
-            style={revealStyle(about.inView, 60)}
-          >
-            About
-          </p>
-
-          <h2
-            className={revealClass(
-              about.inView,
-              cn("relative z-10 text-black", ui.h2)
-            )}
-            style={revealStyle(about.inView, 120)}
-          >
-            Quietly high-touch.
-            <span className={ui.h2Split}>Precisely curated.</span>
-          </h2>
-
-          <div
-            className={revealClass(
-              about.inView,
-              cn("relative z-10 mx-auto mt-10 max-w-4xl space-y-6 text-black/65", ui.body)
-            )}
-            style={revealStyle(about.inView, 200)}
-          >
-            <p>
-              Tufffinds is a London-based personal shopping studio built on
-              taste, discretion and access. We work closely with a global
-              network of trusted sources to find pieces that rarely surface —
-              and never feel forced.
-            </p>
           </div>
         </div>
       </section>
@@ -926,14 +858,6 @@ export default function VersionOnePage() {
                         className="transition hover:text-white"
                       >
                         Email support
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/version-1#about"
-                        className="transition hover:text-white"
-                      >
-                        About Tufffinds
                       </a>
                     </li>
                   </ul>

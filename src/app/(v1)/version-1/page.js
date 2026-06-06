@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "@/app/lib/firebase";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -14,6 +16,8 @@ function SectionDivider() {
     </div>
   );
 }
+
+const SHOW_ABOUT_SECTION = false;
 
 /* ───────────────────────────────────────────
    Scroll reveal — IntersectionObserver
@@ -52,6 +56,14 @@ export default function VersionOnePage() {
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [contactStatus, setContactStatus] = useState("idle");
+  const [contactFeedback, setContactFeedback] = useState("");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -77,20 +89,27 @@ export default function VersionOnePage() {
   useEffect(() => {
     if (!mobileMenuOpen) return;
 
-    const { style } = document.body;
-    const previousOverflow = style.overflow;
-    const previousPaddingRight = style.paddingRight;
+    const bodyStyle = document.body.style;
+    const htmlStyle = document.documentElement.style;
+    const previousBodyOverflow = bodyStyle.overflow;
+    const previousHtmlOverflow = htmlStyle.overflow;
+    const previousOverscrollBehavior = htmlStyle.overscrollBehavior;
+    const previousPaddingRight = bodyStyle.paddingRight;
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 
-    style.overflow = "hidden";
+    bodyStyle.overflow = "hidden";
+    htmlStyle.overflow = "hidden";
+    htmlStyle.overscrollBehavior = "contain";
 
     if (scrollbarWidth > 0) {
-      style.paddingRight = `${scrollbarWidth}px`;
+      bodyStyle.paddingRight = `${scrollbarWidth}px`;
     }
 
     return () => {
-      style.overflow = previousOverflow;
-      style.paddingRight = previousPaddingRight;
+      bodyStyle.overflow = previousBodyOverflow;
+      htmlStyle.overflow = previousHtmlOverflow;
+      htmlStyle.overscrollBehavior = previousOverscrollBehavior;
+      bodyStyle.paddingRight = previousPaddingRight;
     };
   }, [mobileMenuOpen]);
 
@@ -120,7 +139,6 @@ export default function VersionOnePage() {
   const revealStyle = (inView, ms = 0) =>
     inView ? { transitionDelay: `${ms}ms` } : { transitionDelay: "0ms" };
 
-  const about = useInViewOnce();
   const services = useInViewOnce();
   const process = useInViewOnce();
   const founders = useInViewOnce();
@@ -140,15 +158,99 @@ export default function VersionOnePage() {
   const COOKIE_PATH = "/version-1/cookie-policy";
   const DATA_SECURITY_PATH = "/version-1/data-security";
 
+  const handleContactChange = (field) => (event) => {
+    setContactForm((current) => ({
+      ...current,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handleContactSubmit = async (event) => {
+    event.preventDefault();
+
+    const name = contactForm.name.trim();
+    const email = contactForm.email.trim().toLowerCase();
+    const phone = contactForm.phone.trim();
+    const message = contactForm.message.trim();
+
+    if (!name || !email || !phone || !message) {
+      setContactStatus("error");
+      setContactFeedback("Please add your name, email, phone number and brief.");
+      return;
+    }
+
+    setContactStatus("submitting");
+    setContactFeedback("");
+
+    try {
+      const titleBrief = message.split(/\s+/).slice(0, 8).join(" ");
+      await addDoc(collection(db, "requests"), {
+        clientEmail: email,
+        clientId: "",
+        clientName: name,
+        clientPhone: phone,
+        createdAt: serverTimestamp(),
+        detail: {
+          activitySummary: [
+            {
+              id: "submitted",
+              label: "Website enquiry received",
+              meta: "Version 1 contact form",
+              type: "client",
+            },
+          ],
+          categories: [],
+          createdDateLabel: "",
+          dislikedBrands: [],
+          favoriteBrands: [],
+          href: "",
+          id: "",
+          linkedEdits: [],
+          linkedMessagesPreview: [],
+          notes: message,
+          purchaseMode: "Sourcing request",
+          references: [],
+          requestType: "Website enquiry",
+          shippingCountry: "",
+          status: "submitted",
+          statusTimeline: [
+            {
+              id: "submitted",
+              label: "Submitted",
+              meta: "Awaiting review",
+              type: "client",
+            },
+          ],
+          styleNotes: "",
+          title: `${name} - ${titleBrief || "Website enquiry"}`,
+          urgency: "",
+          whatHappensNext: "Review the enquiry and reply to the client by email.",
+        },
+        source: "version-1-contact-form",
+        status: "submitted",
+        submittedFrom: typeof window !== "undefined" ? window.location.pathname : "/version-1",
+        updatedAt: serverTimestamp(),
+      });
+
+      setContactStatus("success");
+      setContactFeedback("Thank you. Your brief has been sent.");
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      console.error("Failed to submit contact form", error);
+      setContactStatus("error");
+      setContactFeedback("Something went wrong. Please email info@tufffinds.com directly.");
+    }
+  };
+
   const navItems = [
     ["Home", "#home"],
-    ["About", "#about"],
     ["Services", "#services"],
     ["Contact", "#contact"],
+    ...(SHOW_ABOUT_SECTION ? [["About", "#about"]] : []),
   ];
 
   return (
-    <main className="min-h-[100svh] overflow-x-hidden bg-[#F8F7F3] text-[#121212] antialiased">
+    <main className="min-h-[100svh] overflow-x-clip bg-[#F8F7F3] text-[#121212] antialiased">
       {/* HEADER */}
       <header
         className={cx(
@@ -219,27 +321,64 @@ export default function VersionOnePage() {
 
         {/* MOBILE MENU */}
         <div
+          aria-hidden={!mobileMenuOpen}
           className={cx(
-            "fixed left-5 right-5 top-[78px] z-[110] mx-auto max-w-[390px] transition-all duration-300 md:hidden",
+            "fixed inset-0 z-[110] bg-[#121212]/20 backdrop-blur-[2px] transition-opacity duration-300 md:hidden",
             mobileMenuOpen
-              ? "pointer-events-auto translate-y-0 opacity-100"
-              : "pointer-events-none -translate-y-4 opacity-0"
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0"
           )}
+          onClick={() => setMobileMenuOpen(false)}
         >
           <nav
             id="version-one-mobile-menu"
-            className="overflow-hidden rounded-[24px] border border-[#40342F]/10 bg-[#F8F7F3] p-3 shadow-[0_24px_70px_rgba(64,52,47,0.12)]"
+            aria-label="Mobile navigation"
+            onClick={(e) => e.stopPropagation()}
+            className={cx(
+              "ml-auto flex h-full w-[min(82vw,380px)] flex-col overflow-y-auto overscroll-contain border-l border-[#40342F]/10 bg-[#F8F7F3] px-5 pb-8 pt-6 shadow-[-24px_0_70px_rgba(64,52,47,0.14)] transition-transform duration-300 ease-out",
+              mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+            )}
           >
+            <div className="mb-10 flex items-center justify-between">
+              <Image
+                src="/finallogobrown.png"
+                alt="Tufffinds"
+                width={180}
+                height={46}
+                className="h-5 w-auto select-none"
+              />
+
+              <button
+                type="button"
+                className="flex h-11 w-11 items-center justify-center bg-transparent text-[#40342F]/80 transition active:scale-[0.98]"
+                aria-label="Close side menu"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="relative block h-5 w-5">
+                  <span className="absolute left-0 top-1/2 h-px w-5 -translate-y-1/2 rotate-45 bg-[#40342F]/85" />
+                  <span className="absolute left-0 top-1/2 h-px w-5 -translate-y-1/2 -rotate-45 bg-[#40342F]/85" />
+                </span>
+              </button>
+            </div>
+
             {navItems.map(([label, href]) => (
               <a
                 key={href}
                 href={href}
-                className="block rounded-xl px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/70 transition hover:bg-[#40342F]/[0.04]"
+                className="border-b border-[#40342F]/10 px-1 py-5 text-[12px] font-semibold uppercase tracking-[0.28em] text-black/70 transition hover:text-black"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {label}
               </a>
             ))}
+
+            <a
+              href="#contact"
+              className="mt-8 min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99]"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Enquire
+            </a>
           </nav>
         </div>
       </header>
@@ -270,109 +409,27 @@ export default function VersionOnePage() {
               Personal Shopping • Wardrobe Edits • Sourcing • Styling
             </p>
 
-            <h1 className={cx(ui.h1, heroReveal)} style={revealStyle(heroIn, 160)}>
-              Find the unfindable
-              <span className="block text-[#40342F]/80">with the ones connected.</span>
-            </h1>
-
-            <p
-              className={cx(
-                "mx-auto mt-5 max-w-xl text-[15px] leading-[1.75] text-black/65 sm:mt-6 md:text-[16px]",
-                heroReveal
-              )}
-              style={revealStyle(heroIn, 240)}
-            >
-              A London-based personal shopping studio for rare, sold-out and hard-to-find luxury pieces.
-              Send the brief — we source, edit and coordinate the rest.
-            </p>
-
             <div
               className={cx(
                 "mt-8 flex flex-col justify-center gap-3 sm:mt-11 sm:flex-row sm:gap-4",
                 heroReveal
               )}
-              style={revealStyle(heroIn, 320)}
+              style={revealStyle(heroIn, 160)}
             >
               <a
                 href="#contact"
-                className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
+                className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#EFE8DE] transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
                 Request sourcing
               </a>
 
               <a
                 href="#services"
-                className="min-h-12 rounded-full border border-[#40342F]/15 bg-white/35 px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#40342F]/85 backdrop-blur transition hover:border-[#40342F]/30 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
+                className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#EFE8DE] transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
                 View services
               </a>
             </div>
-
-            <div
-              className={cx(
-                "mt-9 flex flex-col justify-center gap-2 text-[10px] tracking-[0.22em] uppercase text-black/55 sm:mt-12 sm:flex-row sm:gap-10 sm:text-[11px] sm:tracking-[0.28em]",
-                heroReveal
-              )}
-              style={revealStyle(heroIn, 400)}
-            >
-              <span>London</span>
-              <span>Global network</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <section id="about" className="relative scroll-mt-24 overflow-hidden bg-[#F8F7F3]">
-        <SectionDivider />
-
-        <div
-          ref={about.ref}
-          className={cx(ui.container, ui.sectionY, "relative text-center", revealClass(about.inView))}
-        >
-          {/* Watermark icon */}
-          <div className="pointer-events-none absolute inset-x-0 top-[42%] flex justify-center">
-            <div className="relative w-[130px] sm:w-[170px] md:w-[210px] lg:w-[240px]">
-              <Image
-                src="/icon.png"
-                alt=""
-                width={380}
-                height={380}
-                className="h-auto w-full object-contain opacity-[0.15]"
-                priority={false}
-              />
-            </div>
-          </div>
-
-          <p
-            className={cx("relative z-10 mb-5 text-black/50 sm:mb-6", ui.eyebrow)}
-            style={revealStyle(about.inView, 60)}
-          >
-            About
-          </p>
-
-          <h2 className={cx("relative z-10", ui.h2)} style={revealStyle(about.inView, 120)}>
-            Quietly high-touch.
-            <span className={ui.h2Split}>Precisely curated.</span>
-          </h2>
-
-          <div
-            className={cx("relative z-10 mx-auto mt-8 max-w-4xl space-y-5 sm:mt-10", ui.body)}
-            style={revealStyle(about.inView, 200)}
-          >
-            <p>
-              Tufffinds helps private clients source rare, sold-out and hard-to-find luxury pieces
-              without the overwhelm of searching across boutiques, resale platforms and private sellers.
-            </p>
-
-            <p>
-              From one-off requests to considered wardrobe updates, we edit the options, verify the
-              details and coordinate the process with discretion from first message to delivery.
-            </p>
-
-            <p className="pt-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-black/45 sm:text-[11px] sm:tracking-[0.28em]">
-              Rare pieces · Private sourcing · Personal guidance
-            </p>
           </div>
         </div>
       </section>
@@ -395,7 +452,7 @@ export default function VersionOnePage() {
               className={cx("mb-5 text-black/50 sm:mb-6", ui.eyebrow)}
               style={revealStyle(services.inView, 60)}
             >
-              What We Source
+              Services We Offer
             </p>
 
             <h2 className={ui.h2} style={revealStyle(services.inView, 120)}>
@@ -429,17 +486,17 @@ export default function VersionOnePage() {
               {[
                 {
                   n: "01",
-                  h: "Rare & Sold-Out Pieces",
+                  h: "Personal Shopping and Sourcing",
                   p: "Hard-to-find bags, shoes, accessories and ready-to-wear sourced through trusted private, retail and resale channels.",
                 },
                 {
                   n: "02",
-                  h: "Wardrobe & Event Edits",
+                  h: "Styling Edits / In-Person Styling",
                   p: "Considered pieces for travel, events, seasonal updates and everyday wardrobes — edited to your style, size and budget.",
                 },
                 {
                   n: "03",
-                  h: "Purchase & Delivery Support",
+                  h: "Wardrobe Refresh",
                   p: "We handle checks, approvals, purchase coordination, shipping updates and follow-through with discretion.",
                 },
               ].map((s, idx) => (
@@ -512,7 +569,7 @@ export default function VersionOnePage() {
                 className={cx("mb-5 text-black/50 sm:mb-6", ui.eyebrow)}
                 style={revealStyle(process.inView, 60)}
               >
-                Process
+                The process of personal shopping and sourcing
               </p>
 
               <h2 className={cx(ui.h2, "max-w-xl")} style={revealStyle(process.inView, 120)}>
@@ -534,23 +591,58 @@ export default function VersionOnePage() {
                 {[
                   {
                     n: "01",
-                    h: "Brief",
-                    p: "Send the item, size, budget, preferred condition, timeline and any reference images or links.",
+                    h: "Send Your Request",
+                    p: "Tell us what you’re searching for, with as much detail as possible, and we’ll take it from there.",
+                    p2: (
+                      <>
+                        To send us your request, message us on Instagram{" "}
+                        <a
+                          href="https://www.instagram.com/tufffinds__/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline decoration-[#40342F]/30 underline-offset-4 transition hover:text-[#40342F]"
+                        >
+                          @tufffinds__
+                        </a>
+                        , email us at{" "}
+                        <a
+                          href="mailto:info@tufffinds.com"
+                          className="underline decoration-[#40342F]/30 underline-offset-4 transition hover:text-[#40342F]"
+                        >
+                          info@tufffinds.com
+                        </a>
+                        , or send us a WhatsApp message{" "}
+                        <a
+                          href="https://www.tufffinds.com/link?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGnBfazMQHjtMVXLMbMYQSWDc0F3q7i82ZT-ZnHN4B1CRJaFQq6tCLUVZQyY30_aem_to6S4mLhbMtYxijihS2xIw"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline decoration-[#40342F]/30 underline-offset-4 transition hover:text-[#40342F]"
+                        >
+                          here
+                        </a>
+                        .
+                      </>
+                    ),
                   },
                   {
                     n: "02",
-                    h: "Source",
-                    p: "We search trusted boutiques, private sellers and fashion contacts for viable options.",
+                    h: "We Source",
+                    p: "Our sourcing process begins across a trusted network of boutiques, resellers and global contacts.",
                   },
                   {
                     n: "03",
-                    h: "Edit",
-                    p: "You receive a refined shortlist with pricing, condition, availability and estimated timing.",
+                    h: "Receive a Quote",
+                    p: "Once found, you’ll receive a quote with pricing, delivery timing and shipping estimate.",
                   },
                   {
                     n: "04",
-                    h: "Secure",
-                    p: "Once approved, we coordinate purchase, delivery updates and follow-through with discretion.",
+                    h: "Payment",
+                    p: "Once approved, payment is completed securely via payment link or bank transfer.",
+                  },
+                  {
+                    n: "05",
+                    h: "Final Step",
+                    p: "We will directly ship your item to your chosen address and provide tracking links.",
                   },
                 ].map((s, idx) => (
                   <article
@@ -566,90 +658,12 @@ export default function VersionOnePage() {
                       </h3>
 
                       <p className={cx("mt-2.5 max-w-xl", ui.body)}>{s.p}</p>
+                      {s.p2 ? <p className={cx("mt-3 max-w-xl break-words", ui.body)}>{s.p2}</p> : null}
                     </div>
                   </article>
                 ))}
               </div>
 
-              <div
-                className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                style={revealStyle(process.inView, 640)}
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-black/45">
-                  Clear brief · Refined shortlist · Discreet delivery
-                </p>
-
-                <a
-                  href="#contact"
-                  className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
-                >
-                  Request sourcing
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOUNDERS */}
-      <section id="founders" className="scroll-mt-24 bg-[#F8F7F3]">
-        <SectionDivider />
-
-        <div
-          ref={founders.ref}
-          className={cx(
-            "mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-5 sm:px-6 md:grid-cols-12 md:gap-16 lg:px-8",
-            ui.sectionY,
-            revealClass(founders.inView)
-          )}
-        >
-          <div className="md:col-span-6" style={revealStyle(founders.inView, 120)}>
-            <div className="md:sticky md:top-24">
-              <div className="relative aspect-[4/4.7] max-h-[680px] overflow-hidden rounded-[28px] bg-[#40342F]/5 sm:aspect-[4/5] md:rounded-[32px]">
-                <Image
-                  src="/tufffinds-shoot.jpg"
-                  alt="Gina and Ginevra — founders of Tufffinds"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
-              </div>
-
-              <div className="mt-5 hidden items-center justify-between border-t border-[#40342F]/10 pt-4 text-[10px] uppercase tracking-[0.22em] text-black/45 md:flex">
-                <span>Gina</span>
-                <span>Ginevra</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="md:col-span-6 md:col-start-7" style={revealStyle(founders.inView, 60)}>
-            <p className={cx("mb-5 text-black/50 sm:mb-6", ui.eyebrow)}>Founders</p>
-
-            <h2 className={ui.h2}>
-              Built on trust.
-              <span className={ui.h2Split}>Refined through experience.</span>
-            </h2>
-
-            <div className={cx("mt-7 max-w-xl space-y-5 sm:mt-8 sm:space-y-6", ui.body)}>
-              <p>
-                Founded by Gina and Ginevra, Tufffinds brings together luxury client experience,
-                editorial taste and a trusted international sourcing network.
-              </p>
-
-              <p>
-                Their role is to filter clearly: what is worth considering, what to avoid, and
-                where price, condition or timing makes sense.
-              </p>
-
-              <p>
-                The result is personal shopping that feels calm, discreet and genuinely useful —
-                whether you are sourcing one rare piece or refining a wider wardrobe.
-              </p>
-            </div>
-
-            <div className="mt-8 text-[10px] uppercase tracking-[0.28em] text-black/45 sm:text-[11px] sm:tracking-[0.32em]">
-              Gina &nbsp;·&nbsp; Ginevra
             </div>
           </div>
         </div>
@@ -727,12 +741,16 @@ export default function VersionOnePage() {
               <div className="mx-auto w-full max-w-xl md:pt-12">
                 <div className={cx("mb-7 text-black/50", ui.eyebrow)}>Send a brief</div>
 
-                <form onSubmit={(e) => e.preventDefault()} className="space-y-7">
+                <form onSubmit={handleContactSubmit} className="space-y-7">
                   <div>
                     <label className={cx("mb-2 block text-black/45", ui.eyebrow)}>Name</label>
                     <input
                       type="text"
+                      value={contactForm.name}
+                      onChange={handleContactChange("name")}
                       placeholder="Your name"
+                      autoComplete="name"
+                      required
                       className="w-full border-b border-[#40342F]/20 bg-transparent py-3 text-[16px] text-black/80 outline-none transition placeholder:text-black/30 focus:border-[#40342F]/50"
                     />
                   </div>
@@ -741,7 +759,24 @@ export default function VersionOnePage() {
                     <label className={cx("mb-2 block text-black/45", ui.eyebrow)}>Email</label>
                     <input
                       type="email"
+                      value={contactForm.email}
+                      onChange={handleContactChange("email")}
                       placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                      className="w-full border-b border-[#40342F]/20 bg-transparent py-3 text-[16px] text-black/80 outline-none transition placeholder:text-black/30 focus:border-[#40342F]/50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className={cx("mb-2 block text-black/45", ui.eyebrow)}>Phone</label>
+                    <input
+                      type="tel"
+                      value={contactForm.phone}
+                      onChange={handleContactChange("phone")}
+                      placeholder="+44 7000 000000"
+                      autoComplete="tel"
+                      required
                       className="w-full border-b border-[#40342F]/20 bg-transparent py-3 text-[16px] text-black/80 outline-none transition placeholder:text-black/30 focus:border-[#40342F]/50"
                     />
                   </div>
@@ -752,7 +787,10 @@ export default function VersionOnePage() {
                     </label>
                     <textarea
                       rows={5}
+                      value={contactForm.message}
+                      onChange={handleContactChange("message")}
                       placeholder="Item, size, budget range, timeline, and any links or references…"
+                      required
                       className="w-full resize-none border-b border-[#40342F]/20 bg-transparent py-3 text-[16px] text-black/80 outline-none transition placeholder:text-black/30 focus:border-[#40342F]/50"
                     />
                   </div>
@@ -760,10 +798,23 @@ export default function VersionOnePage() {
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="min-h-12 w-full rounded-full bg-[#40342F] px-10 py-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99]"
+                      disabled={contactStatus === "submitting"}
+                      className="min-h-12 w-full rounded-full bg-[#40342F] px-10 py-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Submit request
+                      {contactStatus === "submitting" ? "Sending..." : "Submit request"}
                     </button>
+
+                    {contactFeedback ? (
+                      <p
+                        className={cx(
+                          "mt-4 text-center text-[11px] leading-relaxed",
+                          contactStatus === "success" ? "text-[#40342F]" : "text-red-700"
+                        )}
+                        role="status"
+                      >
+                        {contactFeedback}
+                      </p>
+                    ) : null}
 
                     <p className="mt-4 text-center text-[10px] leading-relaxed tracking-[0.14em] text-black/40 sm:text-[11px] sm:tracking-[0.16em]">
                       By submitting, you agree to be contacted about your enquiry.
@@ -776,6 +827,74 @@ export default function VersionOnePage() {
         </div>
       </section>
 
+      {SHOW_ABOUT_SECTION ? (
+        <>
+          {/* ABOUT */}
+          <section id="about" className="scroll-mt-24 bg-[#F8F7F3]">
+            <SectionDivider />
+
+            <div
+              ref={founders.ref}
+              className={cx(
+                "mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-5 sm:px-6 md:grid-cols-12 md:gap-16 lg:px-8",
+                ui.sectionY,
+                revealClass(founders.inView)
+              )}
+            >
+              <div className="md:col-span-6" style={revealStyle(founders.inView, 120)}>
+                <div className="md:sticky md:top-24">
+                  <div className="relative aspect-[4/4.7] max-h-[680px] overflow-hidden rounded-[28px] bg-[#40342F]/5 sm:aspect-[4/5] md:rounded-[32px]">
+                    <Image
+                      src="/tufffinds-shoot.jpg"
+                      alt="Gina and Ginevra — founders of Tufffinds"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
+                  </div>
+
+                  <div className="mt-5 hidden items-center justify-between border-t border-[#40342F]/10 pt-4 text-[10px] uppercase tracking-[0.22em] text-black/45 md:flex">
+                    <span>Gina</span>
+                    <span>Ginevra</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="md:col-span-6 md:col-start-7" style={revealStyle(founders.inView, 60)}>
+                <p className={cx("mb-5 text-black/50 sm:mb-6", ui.eyebrow)}>About</p>
+
+                <h2 className={ui.h2}>
+                  Tufffinds,
+                  <span className={ui.h2Split}>founded by Gina and Ginevra.</span>
+                </h2>
+
+                <div className={cx("mt-7 max-w-xl space-y-5 sm:mt-8 sm:space-y-6", ui.body)}>
+                  <p>
+                    Founded by Gina and Ginevra, Tufffinds brings together luxury client experience,
+                    editorial taste and a trusted international sourcing network.
+                  </p>
+
+                  <p>
+                    Their role is to filter clearly: what is worth considering, what to avoid, and
+                    where price, condition or timing makes sense.
+                  </p>
+
+                  <p>
+                    The result is personal shopping that feels calm, discreet and genuinely useful —
+                    whether you are sourcing one rare piece or refining a wider wardrobe.
+                  </p>
+                </div>
+
+                <div className="mt-8 text-[10px] uppercase tracking-[0.28em] text-black/45 sm:text-[11px] sm:tracking-[0.32em]">
+                  Gina &nbsp;·&nbsp; Ginevra
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      ) : null}
+
       {/* FOOTER */}
       <footer ref={footer.ref} className={cx("bg-[#40342F] text-white", revealClass(footer.inView))}>
         <div className="border-t border-white/10">
@@ -786,7 +905,7 @@ export default function VersionOnePage() {
                 alt="Tufffinds"
                 width={220}
                 height={56}
-                className="h-6 w-auto select-none invert brightness-[1.05]"
+                className="h-6 w-auto select-none brightness-0 invert"
               />
 
               <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">
@@ -835,11 +954,13 @@ export default function VersionOnePage() {
                         Email support
                       </a>
                     </li>
-                    <li>
-                      <a href={`${HOME_PATH}#about`} className="transition hover:text-white">
-                        About Tufffinds
-                      </a>
-                    </li>
+                    {SHOW_ABOUT_SECTION ? (
+                      <li>
+                        <a href={`${HOME_PATH}#about`} className="transition hover:text-white">
+                          About Tufffinds
+                        </a>
+                      </li>
+                    ) : null}
                   </ul>
                 </div>
 
