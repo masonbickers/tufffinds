@@ -516,7 +516,7 @@ export default function VersionOnePage() {
             <div className="mt-9 md:hidden" style={revealStyle(services.inView, 240)}>
               <div className="relative aspect-[4/4.7] overflow-hidden rounded-[28px] bg-[#40342F]/5">
                 <Image
-                  src="/services.jpg"
+                  src="/street.jpg"
                   alt="Tufffinds services"
                   fill
                   className="object-cover object-center"
@@ -597,7 +597,7 @@ export default function VersionOnePage() {
             <div>
               <div className="relative aspect-[4/5] max-h-[680px] overflow-hidden rounded-[32px] bg-[#40342F]/5">
                 <Image
-                  src="/services.jpg"
+                  src="/street.jpg"
                   alt="Tufffinds services"
                   fill
                   className="object-cover object-center"
