@@ -5,7 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
-import type { AdminRequest, RequestDetail, RequestStatus } from "../admin-types";
+import type {
+  AdminRequest,
+  FirestoreTimestampValue,
+  RequestDetail,
+  RequestStatus,
+} from "../admin-types";
 import {
   classNames,
   formatDateTime,
@@ -36,10 +41,10 @@ export default function AdminRequestsPage() {
           const data = entry.data() as {
             clientEmail?: string;
             clientId?: string;
-            createdAt?: any;
+            createdAt?: FirestoreTimestampValue;
             detail?: RequestDetail;
             status?: RequestStatus;
-            updatedAt?: any;
+            updatedAt?: FirestoreTimestampValue;
           };
 
           const status = data.status ?? data.detail?.status ?? "submitted";

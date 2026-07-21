@@ -5,7 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
-import type { AdminThread, ThreadDetail } from "../admin-types";
+import type {
+  AdminThread,
+  FirestoreTimestampValue,
+  ThreadDetail,
+} from "../admin-types";
 import { formatDateTime, normalizeTimestamp } from "../admin-utils";
 
 export default function AdminMessagesPage() {
@@ -31,7 +35,7 @@ export default function AdminMessagesPage() {
             clientId?: string;
             detail?: ThreadDetail;
             lastMessagePreview?: string;
-            updatedAt?: any;
+            updatedAt?: FirestoreTimestampValue;
           };
 
           return {

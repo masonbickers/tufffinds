@@ -5,13 +5,16 @@ import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth, db } from "@/app/lib/firebase";
+import AdminSignInOptions from "./AdminSignInOptions";
 
 type AdminSection =
   | "dashboard"
   | "clients"
   | "requests"
   | "messages"
-  | "orders";
+  | "orders"
+  | "email-signups"
+  | "email-campaigns";
 
 type AdminUserRecord = {
   active?: boolean;
@@ -32,7 +35,6 @@ type AdminShellProps = {
   metrics?: AdminMetrics;
 };
 
-const ADMIN_EMAIL_DOMAIN = "@tufffinds.com";
 const NAV_ITEMS: Array<{
   href: string;
   label: string;
@@ -43,6 +45,16 @@ const NAV_ITEMS: Array<{
   { href: "/admin/requests", label: "Requests", section: "requests" },
   { href: "/admin/orders", label: "Orders", section: "orders" },
   { href: "/admin/messages", label: "Messages", section: "messages" },
+  {
+    href: "/admin/email-signups",
+    label: "Email signups",
+    section: "email-signups",
+  },
+  {
+    href: "/admin/email-campaigns",
+    label: "Email campaigns",
+    section: "email-campaigns",
+  },
 ];
 
 export default function AdminShell({
@@ -87,13 +99,8 @@ export default function AdminShell({
           ? (snapshot.data() as AdminUserRecord)
           : null;
 
-        const domainAuthorized =
-          user.email?.toLowerCase().endsWith(ADMIN_EMAIL_DOMAIN) ?? false;
-
         setAdminRecord(data);
-        setAdminAllowed(
-          Boolean((data?.active && data?.role === "admin") || domainAuthorized),
-        );
+        setAdminAllowed(Boolean(data?.active && data?.role === "admin"));
         setAdminReady(true);
       },
       (error) => {
@@ -127,6 +134,14 @@ export default function AdminShell({
           <h1 className="mt-4 font-serif text-4xl">
             Please sign in to access admin.
           </h1>
+
+          <AdminSignInOptions />
+
+          {adminError ? (
+            <p className="mt-4 text-sm text-[#9F3A2A]" role="alert">
+              {adminError}
+            </p>
+          ) : null}
         </div>
       </main>
     );

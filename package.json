@@ -2,11 +2,20 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "next lint --max-warnings=0",
+    "email:launch": "node functions/scripts/launch-email-campaign.js --dry-run",
+    "email:launch:retry-failed": "node functions/scripts/launch-email-campaign.js --retry-failed",
+    "email:launch:send": "node functions/scripts/launch-email-campaign.js --send",
+    "email:launch:test": "node functions/scripts/launch-email-campaign.js --test",
+    "email:preview:launch": "node scripts/preview-launch-email.js",
+    "email:preview:welcome": "node scripts/preview-welcome-email.js",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0",
     "lint:raw": "eslint . --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --noEmit"
   },

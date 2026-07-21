@@ -2,32 +2,26 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const ALLOW = [
+const BLOCKED_ROUTES = [
+  /^\/admin\/orders\/[^/]+\/?$/,
   /^\/coming-soon(\/|$)/,
-  /^\/link(\/|$)/,
   /^\/duty-calculator(\/|$)/,
-  /^\/admin(\/|$)/,
-  /^\/version-1(\/|$)/,         // ✅ ADD THIS
-  /^\/api(\/|$)/,
-  /^\/_next\//,
-  /^\/favicon\.ico$/,
-  /^\/robots\.txt$/,
-  /^\/sitemap\.xml$/,
-  /\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|map|txt)$/
+  /^\/single-site(\/|$)/,
+  /^\/version-1\/(?:app|test)(\/|$)/,
+  /^\/voice(\/|$)/,
 ];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // let allowed paths through
-  if (ALLOW.some((r) => r.test(pathname))) {
-    return NextResponse.next();
+  if (BLOCKED_ROUTES.some((pattern) => pattern.test(pathname))) {
+    return new NextResponse("Not Found", {
+      status: 404,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
 
-  // serve /coming-soon content *without* changing the URL
-  const url = req.nextUrl.clone();
-  url.pathname = "/coming-soon";
-  return NextResponse.rewrite(url);
+  return NextResponse.next();
 }
 
 export const config = {

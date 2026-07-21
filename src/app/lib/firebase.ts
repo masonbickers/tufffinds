@@ -1,43 +1,75 @@
-// src/lib/firebase.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { getFunctions } from "firebase/functions";
 
-/**
- * Prefer ENV vars in production. You can keep these hardcoded while testing,
- * but add them to Vercel later as NEXT_PUBLIC_* (see notes below).
- */
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "AIzaSyCUGNekU4edYGDtl7SXjBJ7-skPVMOuyUo",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "tufffinds.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "tufffinds",
-  // IMPORTANT: the storageBucket should be "<project-id>.appspot.com"
-  // not "firebasestorage.app"
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "tufffinds.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "71851233987",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "1:71851233987:web:3caa05caa5ddbbe9b8c876",
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? "G-CFY7MP8Q1L",
+const requiredFirebaseEnv = {
+  NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID:
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Avoid re-initialising during dev HMR
+const missingFirebaseEnv = Object.entries(requiredFirebaseEnv)
+  .filter(([, value]) => !value)
+  .map(([name]) => name);
+
+if (typeof window !== "undefined" && missingFirebaseEnv.length > 0) {
+  throw new Error(
+    `Missing required Firebase environment variables: ${missingFirebaseEnv.join(", ")}`
+  );
+}
+
+// Client components are evaluated while Next.js prerenders. These inert values
+// let that server-only pass complete without weakening the browser-side check.
+const serverPlaceholder = typeof window === "undefined";
+
+const firebaseConfig = {
+  apiKey:
+    requiredFirebaseEnv.NEXT_PUBLIC_FIREBASE_API_KEY ??
+    (serverPlaceholder ? `AIzaSy${"0".repeat(33)}` : undefined),
+  authDomain:
+    requiredFirebaseEnv.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ??
+    (serverPlaceholder ? "build.invalid" : undefined),
+  projectId:
+    requiredFirebaseEnv.NEXT_PUBLIC_FIREBASE_PROJECT_ID ??
+    (serverPlaceholder ? "build-placeholder" : undefined),
+  storageBucket:
+    requiredFirebaseEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ??
+    (serverPlaceholder ? "build.invalid" : undefined),
+  messagingSenderId:
+    requiredFirebaseEnv.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ??
+    (serverPlaceholder ? "000000000000" : undefined),
+  appId:
+    requiredFirebaseEnv.NEXT_PUBLIC_FIREBASE_APP_ID ??
+    (serverPlaceholder ? "1:000000000000:web:0000000000000000000000" : undefined),
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+};
+
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+export const functions = getFunctions(app, "europe-west2");
 export const googleProvider = new GoogleAuthProvider();
+export const microsoftProvider = new OAuthProvider("microsoft.com");
 
-/**
- * Analytics only works in the browser. Call this inside client components if needed.
- * Example: `initAnalytics().then(() => {})`
- */
+microsoftProvider.setCustomParameters({
+  prompt: "select_account",
+});
+
 export async function initAnalytics() {
   if (typeof window === "undefined") return;
   try {
     const { getAnalytics, isSupported } = await import("firebase/analytics");
     if (await isSupported()) getAnalytics(app);
   } catch {
-    // ignore if unsupported (SSR / older browsers)
+    // Analytics is optional and unsupported in some browser/SSR environments.
   }
 }

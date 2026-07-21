@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
+import NewsletterForm from "./_components/NewsletterForm";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -149,10 +151,10 @@ export default function VersionOnePage() {
   const heroIn = mounted;
   const heroReveal = revealClass(heroIn);
 
-  const HOME_PATH = "/version-1";
-  const FAQ_PATH = "/version-1/faq";
-  const PRIVACY_PATH = "/version-1/privacy-policy";
-  const TERMS_PATH = "/version-1/terms";
+  const HOME_PATH = "/";
+  const FAQ_PATH = "/faq";
+  const PRIVACY_PATH = "/privacy";
+  const TERMS_PATH = "/terms";
 
   const handleContactChange = (field) => (event) => {
     setContactForm((current) => ({
@@ -191,7 +193,7 @@ export default function VersionOnePage() {
             {
               id: "submitted",
               label: "Website enquiry received",
-              meta: "Version 1 contact form",
+              meta: "Website contact form",
               type: "client",
             },
           ],
@@ -224,7 +226,7 @@ export default function VersionOnePage() {
         },
         source: "version-1-contact-form",
         status: "submitted",
-        submittedFrom: typeof window !== "undefined" ? window.location.pathname : "/version-1",
+        submittedFrom: typeof window !== "undefined" ? window.location.pathname : "/",
         updatedAt: serverTimestamp(),
       });
 
@@ -269,7 +271,7 @@ export default function VersionOnePage() {
             scrolled || mobileMenuOpen ? "border-b border-[#40342F]/10" : ""
           )}
         >
-          <a href={`${HOME_PATH}#home`} aria-label="Tufffinds home" onClick={() => setMobileMenuOpen(false)}>
+          <Link href={`${HOME_PATH}#home`} aria-label="Tufffinds home" onClick={() => setMobileMenuOpen(false)}>
             <Image
               src="/finallogobrown.png"
               alt="Tufffinds"
@@ -278,23 +280,23 @@ export default function VersionOnePage() {
               priority
               className="h-5 w-auto select-none sm:h-6"
             />
-          </a>
+          </Link>
 
           <div className="hidden items-center gap-6 md:flex">
             <nav className="flex items-center gap-6 text-[11px] tracking-[0.26em] uppercase text-black/70">
               {navItems.map(([label, href]) => (
-                <a key={href} href={href} className="transition hover:text-black">
+                <Link key={href} href={href} className="transition hover:text-black">
                   {label}
-                </a>
+                </Link>
               ))}
             </nav>
 
-            <a
+            <Link
               href={`${HOME_PATH}#contact`}
               className="rounded-full border border-[#40342F]/30 px-5 py-2.5 text-[10px] font-semibold tracking-[0.22em] uppercase text-[#40342F] transition hover:border-[#40342F]/60"
             >
               Enquire
-            </a>
+            </Link>
           </div>
 
           {/* Mobile burger icon */}
@@ -367,23 +369,23 @@ export default function VersionOnePage() {
             </div>
 
             {navItems.map(([label, href]) => (
-              <a
+              <Link
                 key={href}
                 href={href}
                 className="border-b border-[#40342F]/10 px-1 py-5 text-[12px] font-semibold uppercase tracking-[0.28em] text-black/70 transition hover:text-black"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {label}
-              </a>
+              </Link>
             ))}
 
-            <a
+            <Link
               href={`${HOME_PATH}#contact`}
               className="mt-8 min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99]"
               onClick={() => setMobileMenuOpen(false)}
             >
               Enquire
-            </a>
+            </Link>
           </nav>
         </div>
       </header>
@@ -391,7 +393,7 @@ export default function VersionOnePage() {
       {/* HERO */}
       <section
         id="home"
-        className="relative flex min-h-[100svh] scroll-mt-24 items-center overflow-hidden bg-[#EFE8DE]"
+        className="relative flex min-h-[100svh] scroll-mt-[77px] items-center overflow-hidden bg-[#EFE8DE] md:scroll-mt-[73px]"
       >
         {/* Premium editorial background */}
         <div className="pointer-events-none absolute inset-0">
@@ -440,19 +442,19 @@ export default function VersionOnePage() {
               )}
               style={revealStyle(heroIn, 240)}
             >
-              <a
+              <Link
                 href={`${HOME_PATH}#contact`}
                 className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#EFE8DE] transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
                 Request sourcing
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href={`${HOME_PATH}#services`}
                 className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#EFE8DE] transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
                 View services
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -487,7 +489,7 @@ export default function VersionOnePage() {
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="scroll-mt-24 bg-[#F8F7F3]">
+      <section id="services" className="scroll-mt-[77px] bg-[#F8F7F3] md:scroll-mt-[73px]">
         <SectionDivider />
 
         <div
@@ -540,14 +542,14 @@ export default function VersionOnePage() {
                   p2: (
                     <>
                       To enquire about this service, please send us a{" "}
-                      <a
-                        href="https://www.tufffinds.com/link?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGnBfazMQHjtMVXLMbMYQSWDc0F3q7i82ZT-ZnHN4B1CRJaFQq6tCLUVZQyY30_aem_to6S4mLhbMtYxijihS2xIw"
+                      <Link
+                        href="/link?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGnBfazMQHjtMVXLMbMYQSWDc0F3q7i82ZT-ZnHN4B1CRJaFQq6tCLUVZQyY30_aem_to6S4mLhbMtYxijihS2xIw"
                         target="_blank"
                         rel="noreferrer"
                         className="underline decoration-[#40342F]/30 underline-offset-4 transition hover:text-[#40342F]"
                       >
                         message
-                      </a>
+                      </Link>
                       .
                     </>
                   ),
@@ -616,7 +618,7 @@ export default function VersionOnePage() {
       </section>
 
       {/* PROCESS */}
-      <section id="process" className="scroll-mt-24 bg-[#F8F7F3]">
+      <section id="process" className="scroll-mt-[77px] bg-[#F8F7F3] md:scroll-mt-[73px]">
         <SectionDivider />
 
         <div
@@ -677,14 +679,14 @@ export default function VersionOnePage() {
                           info@tufffinds.com
                         </a>
                         , or send us a WhatsApp message{" "}
-                        <a
-                          href="https://www.tufffinds.com/link?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGnBfazMQHjtMVXLMbMYQSWDc0F3q7i82ZT-ZnHN4B1CRJaFQq6tCLUVZQyY30_aem_to6S4mLhbMtYxijihS2xIw"
+                        <Link
+                          href="/link?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGnBfazMQHjtMVXLMbMYQSWDc0F3q7i82ZT-ZnHN4B1CRJaFQq6tCLUVZQyY30_aem_to6S4mLhbMtYxijihS2xIw"
                           target="_blank"
                           rel="noreferrer"
                           className="underline decoration-[#40342F]/30 underline-offset-4 transition hover:text-[#40342F]"
                         >
                           here
-                        </a>
+                        </Link>
                         .
                       </>
                     ),
@@ -735,7 +737,7 @@ export default function VersionOnePage() {
       </section>
 
       {/* ABOUT */}
-      <section id="about" className="scroll-mt-24 bg-[#F8F7F3]">
+      <section id="about" className="scroll-mt-[77px] bg-[#F8F7F3] md:scroll-mt-[73px]">
         <SectionDivider />
 
         <div
@@ -797,7 +799,7 @@ export default function VersionOnePage() {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="scroll-mt-24 bg-[#F8F7F3]">
+      <section id="contact" className="scroll-mt-[77px] bg-[#F8F7F3] md:scroll-mt-[73px]">
         <SectionDivider />
 
         <div
@@ -964,6 +966,7 @@ export default function VersionOnePage() {
                 alt="Tufffinds"
                 width={220}
                 height={56}
+                priority
                 className="h-6 w-auto select-none [filter:brightness(0)_saturate(100%)_invert(92%)_sepia(12%)_saturate(243%)_hue-rotate(337deg)_brightness(106%)_contrast(90%)]"
               />
 
@@ -971,23 +974,7 @@ export default function VersionOnePage() {
                 Join for updates, edits, and early access to sourcing drops.
               </p>
 
-              <form
-                className="mt-5 flex max-w-md flex-col gap-3 sm:flex-row sm:items-center"
-                onSubmit={(e) => e.preventDefault()}
-              >
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="h-11 w-full rounded-full border border-white/20 bg-transparent px-5 text-[16px] text-white outline-none transition placeholder:text-white/45 focus:border-white/40 sm:h-10 sm:text-sm"
-                />
-
-                <button
-                  type="submit"
-                  className="h-11 rounded-full bg-white px-6 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#40342F] transition hover:bg-white/90 active:scale-[0.99] sm:h-10"
-                >
-                  Join
-                </button>
-              </form>
+              <NewsletterForm page="/" />
             </div>
 
             <div className="md:col-span-7 md:col-start-7" style={revealStyle(footer.inView, 140)}>
@@ -999,14 +986,14 @@ export default function VersionOnePage() {
 
                   <ul className="mt-4 space-y-2.5 text-sm text-white/70">
                     <li>
-                      <a href={`${HOME_PATH}#contact`} className="transition hover:text-white">
+                      <Link href={`${HOME_PATH}#contact`} className="transition hover:text-white">
                         Contact
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href={FAQ_PATH} className="transition hover:text-white">
+                      <Link href={FAQ_PATH} className="transition hover:text-white">
                         FAQ
-                      </a>
+                      </Link>
                     </li>
                     <li>
                       <a href="mailto:info@tufffinds.com" className="transition hover:text-white">
@@ -1014,9 +1001,9 @@ export default function VersionOnePage() {
                       </a>
                     </li>
                     <li>
-                      <a href={`${HOME_PATH}#about`} className="transition hover:text-white">
+                      <Link href={`${HOME_PATH}#about`} className="transition hover:text-white">
                         About Tufffinds
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -1028,14 +1015,14 @@ export default function VersionOnePage() {
 
                   <ul className="mt-4 space-y-2.5 text-sm text-white/70">
                     <li>
-                      <a href={PRIVACY_PATH} className="transition hover:text-white">
+                      <Link href={PRIVACY_PATH} className="transition hover:text-white">
                         Privacy policy
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href={TERMS_PATH} className="transition hover:text-white">
+                      <Link href={TERMS_PATH} className="transition hover:text-white">
                         Terms of use
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -1046,7 +1033,12 @@ export default function VersionOnePage() {
           <div className="border-t border-white/10">
             <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-4 text-[10px] uppercase tracking-[0.2em] text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
               <p>© {new Date().getFullYear()} Tufffinds — All rights reserved</p>
-              <p className="hidden sm:block">London · Global sourcing</p>
+              <div className="flex items-center gap-4">
+                <p className="hidden sm:block">London · Global sourcing</p>
+                <Link href="/admin" className="transition hover:text-white">
+                  Admin
+                </Link>
+              </div>
             </div>
           </div>
         </div>

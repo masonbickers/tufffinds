@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./coming-soon.module.css";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { FirebaseError } from "firebase/app"; // ✅ for proper error typing
 
@@ -13,18 +12,10 @@ const isFirebaseError = (e: unknown): e is FirebaseError =>
   typeof e === "object" && e !== null && "code" in e && "message" in e;
 
 export default function ComingSoonPage() {
-  const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
   const [message, setMessage] = useState("");
   const rootRef = useRef<HTMLElement | null>(null);
-
-  // ✅ Subtle top-right access
-  const [showAccess, setShowAccess] = useState(false);
-  const [pw, setPw] = useState("");
-  const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "err">("idle");
-  const [pwMsg, setPwMsg] = useState("");
 
   // === Floating icon: constant-speed random walk + slow spin ===
   useEffect(() => {
@@ -140,17 +131,12 @@ export default function ComingSoonPage() {
     try {
       setStatus("loading");
       const emailLC = email.trim().toLowerCase();
-      // ⬇️ write to waitlist/{email} so duplicates overwrite, not spam
-      await setDoc(
-        doc(db, "waitlist", emailLC),
-        {
-          email: emailLC,
-          createdAt: serverTimestamp(),
-          source: "web:coming-soon",
-          ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
-        },
-        { merge: true }
-      );
+      await addDoc(collection(db, "waitlist"), {
+        email: emailLC,
+        createdAt: serverTimestamp(),
+        source: "web:coming-soon",
+        ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      });
 
       setStatus("ok");
       setMessage("You’re on the list! We’ll be in touch soon.");
@@ -172,147 +158,8 @@ export default function ComingSoonPage() {
     }
   };
 
-  const onPasswordSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setPwMsg("");
-    setPwStatus("loading");
-
-    const PASSWORD = "Ginny01Gina01";
-    const ok = (pw || "").trim() === PASSWORD;
-
-    if (!ok) {
-      setPwStatus("err");
-      setPwMsg("Incorrect password.");
-      return;
-    }
-
-    try {
-      sessionStorage.setItem("tufffinds_v1_ok", "1"); // optional
-    } catch {
-      // ignore
-    }
-
-    router.push("/version-1");
-  };
-
   return (
     <main ref={rootRef} className={styles.cs}>
-      {/* ✅ Subtle access entry (top-right, not obvious) */}
-      <div
-        style={{
-          position: "fixed",
-          top: 22,
-          right: 24,
-          zIndex: 50,
-          fontSize: 11,
-          letterSpacing: "0.32em",
-          textTransform: "uppercase",
-          userSelect: "none",
-        }}
-      >
-        {!showAccess ? (
-          <button
-            type="button"
-            onClick={() => {
-              setShowAccess(true);
-              setPwMsg("");
-              setPwStatus("idle");
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              color: "rgba(0,0,0,0.45)",
-            }}
-            aria-label="Access"
-          >
-            Access
-          </button>
-        ) : (
-          <form
-            onSubmit={onPasswordSubmit}
-            style={{ display: "flex", alignItems: "center", gap: 8 }}
-          >
-            <input
-              type="password"
-              value={pw}
-              onChange={(e) => {
-                setPw(e.target.value);
-                if (pwStatus !== "idle") setPwStatus("idle");
-                if (pwMsg) setPwMsg("");
-              }}
-              placeholder="Password"
-              autoFocus
-              autoComplete="current-password"
-              style={{
-                border: "none",
-                borderBottom: "1px solid rgba(0,0,0,0.25)",
-                background: "transparent",
-                outline: "none",
-                fontSize: 11,
-                letterSpacing: "0.18em",
-                width: 130,
-                color: "rgba(0,0,0,0.75)",
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                color: "rgba(0,0,0,0.60)",
-                fontSize: 14,
-                lineHeight: 1,
-              }}
-              aria-label="Enter"
-            >
-              →
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowAccess(false);
-                setPw("");
-                setPwMsg("");
-                setPwStatus("idle");
-              }}
-              style={{
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                color: "rgba(0,0,0,0.35)",
-                fontSize: 12,
-                lineHeight: 1,
-              }}
-              aria-label="Close"
-              title="Close"
-            >
-              ×
-            </button>
-          </form>
-        )}
-
-        {pwMsg && (
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: 10,
-              letterSpacing: "0.12em",
-              textTransform: "none",
-              color: "#b00020",
-              textAlign: "right",
-            }}
-          >
-            {pwMsg}
-          </div>
-        )}
-      </div>
-
       <div className={styles.csInner}>
         <div className={styles.logoWrap}>
           <Image
@@ -321,6 +168,7 @@ export default function ComingSoonPage() {
             fill
             sizes="(max-width: 940px) 75vw, 600px"
             priority
+            unoptimized
             className={styles.logoImg}
           />
         </div>

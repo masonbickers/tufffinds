@@ -2,21 +2,10 @@ const { setGlobalOptions } = require("firebase-functions");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const logger = require("firebase-functions/logger");
 const { Resend } = require("resend");
+const { BRAND, createLogoHtml, escapeHtml } = require("./email-brand");
+const { createWelcomeEmailBuilder } = require("./welcome-email");
 
 setGlobalOptions({ maxInstances: 10 });
-
-const BRAND = {
-  cream: "#F8F4EF",
-  softCream: "#FCFAF7",
-  white: "#FFFFFF",
-  black: "#151515",
-  brown: "#40342F",
-  charcoal: "#2B2927",
-  taupe: "#8A7A6A",
-  gold: "#B89B72",
-  border: "#E8DDD0",
-  muted: "#6F675F",
-};
 
 const SITE_URL = (
   process.env.SITE_URL ||
@@ -29,39 +18,12 @@ const WHATSAPP_URL =
   "https://wa.me/447591207418?text=Hi%20Tufffinds%2C%20I%27ve%20submitted%20a%20sourcing%20brief.";
 
 const LOGO_URL = process.env.BRAND_LOGO_URL || `${SITE_URL}/finallogobrown.png`;
-
-function wordmarkHtml({
-  align = "center",
-  color = BRAND.black,
-  fontSize = 30,
-  margin = "0 auto",
-} = {}) {
-  return `
-    <div style="margin:${margin}; text-align:${align}; font-family:Georgia, 'Times New Roman', serif; font-size:${fontSize}px; line-height:1; font-style:italic; letter-spacing:-0.4px; color:${color}; white-space:nowrap;">
-      TUFFFINDS
-    </div>
-  `;
-}
-
-function logoHtml({ width = 220, margin = "0 auto 8px auto" } = {}) {
-  return `
-    <div style="margin:${margin}; text-align:center;">
-      <img src="${LOGO_URL}" width="${width}" alt="Tufffinds" style="display:block; width:${width}px; max-width:100%; height:auto; margin:0 auto; border:0; outline:none; text-decoration:none;" />
-      <div style="mso-hide:all; display:none; max-height:0; overflow:hidden; font-family:Georgia, 'Times New Roman', serif; font-size:24px; line-height:1; font-style:italic; letter-spacing:-0.4px; color:${BRAND.black}; white-space:nowrap;">
-        TUFFFINDS
-      </div>
-    </div>
-  `;
-}
-
-function escapeHtml(value) {
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+const logoHtml = createLogoHtml(LOGO_URL);
+const buildWelcomeEmail = createWelcomeEmailBuilder({
+  logoUrl: LOGO_URL,
+  whatsappUrl: WHATSAPP_URL,
+  contactUrl: "https://tufffinds.com/#contact",
+});
 
 function formatMultiline(value) {
   return escapeHtml(value).replace(/\n/g, "<br />");
@@ -409,3 +371,124 @@ exports.sendTufffindsRequestEmails = onDocumentCreated(
     logger.info(`Emails sent for request ${requestId}`);
   }
 );
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeSignupEmail(value) {
+  if (typeof value !== "string") return "";
+
+  const email = value.trim().toLowerCase();
+  return email.length <= 320 && EMAIL_PATTERN.test(email) ? email : "";
+}
+
+async function sendSignupWelcomeEmail({
+  event,
+  collectionName,
+  idempotencyPrefix,
+  sourceLabel,
+}) {
+  const signupId = event.params?.signupId || "unknown";
+  const snapshot = event.data;
+
+  if (!snapshot) {
+    logger.warn("Skipping welcome email: signup document is unavailable.", {
+      collectionName,
+      signupId,
+    });
+    return;
+  }
+
+  const email = normalizeSignupEmail(snapshot.data()?.email);
+
+  if (!email) {
+    logger.warn("Skipping welcome email: signup email is missing or invalid.", {
+      collectionName,
+      signupId,
+    });
+    return;
+  }
+
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  if (!resendApiKey) {
+    logger.error("Welcome email configuration is incomplete.", {
+      collectionName,
+      signupId,
+    });
+    throw new Error("Welcome email configuration is incomplete.");
+  }
+
+  const resend = new Resend(resendApiKey);
+  const { subject, html, text } = buildWelcomeEmail({ sourceLabel });
+
+  try {
+    const response = await resend.emails.send(
+      {
+        from: "Tufffinds <info@tufffinds.com>",
+        to: email,
+        subject,
+        html,
+        text,
+      },
+      {
+        idempotencyKey: `${idempotencyPrefix}/${signupId}`,
+      }
+    );
+
+    if (response.error || !response.data?.id) {
+      throw new Error("Resend did not accept the welcome email.");
+    }
+  } catch {
+    logger.error("Welcome email delivery failed.", {
+      collectionName,
+      signupId,
+    });
+    throw new Error("Welcome email delivery failed.");
+  }
+
+  logger.info("Welcome email sent.", { collectionName, signupId });
+}
+
+exports.sendNewsletterWelcomeEmail = onDocumentCreated(
+  {
+    document: "newsletter_signups/{signupId}",
+    region: "europe-west2",
+  },
+  (event) =>
+    sendSignupWelcomeEmail({
+      event,
+      collectionName: "newsletter_signups",
+      idempotencyPrefix: "newsletter-welcome",
+      sourceLabel: "Newsletter signup",
+    })
+);
+
+exports.sendWaitlistWelcomeEmail = onDocumentCreated(
+  {
+    document: "waitlist/{signupId}",
+    region: "europe-west2",
+  },
+  (event) =>
+    sendSignupWelcomeEmail({
+      event,
+      collectionName: "waitlist",
+      idempotencyPrefix: "waitlist-welcome",
+      sourceLabel: "Waitlist signup",
+    })
+);
+
+const adminEmailCampaigns = require("./admin-email-campaigns");
+
+exports.previewAdminEmailTemplate =
+  adminEmailCampaigns.previewAdminEmailTemplate;
+exports.sendAdminTestEmail = adminEmailCampaigns.sendAdminTestEmail;
+exports.auditLaunchEmailRecipients =
+  adminEmailCampaigns.auditLaunchEmailRecipients;
+exports.startLaunchEmailCampaign =
+  adminEmailCampaigns.startLaunchEmailCampaign;
+exports.getLaunchEmailCampaignStatus =
+  adminEmailCampaigns.getLaunchEmailCampaignStatus;
+exports.retryFailedLaunchEmailCampaign =
+  adminEmailCampaigns.retryFailedLaunchEmailCampaign;
+exports.processLaunchEmailCampaignBatch =
+  adminEmailCampaigns.processLaunchEmailCampaignBatch;

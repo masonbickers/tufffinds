@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
+import type { FirestoreTimestampValue } from "../admin-types";
 import {
   classNames,
   formatDateTime,
@@ -131,8 +132,8 @@ export default function AdminOrdersPage() {
             trackingNumber?: string;
             trackingUrl?: string;
             notes?: string;
-            createdAt?: any;
-            updatedAt?: any;
+            createdAt?: FirestoreTimestampValue;
+            updatedAt?: FirestoreTimestampValue;
           };
 
           return {
@@ -236,7 +237,7 @@ export default function AdminOrdersPage() {
             </div>
 
             <Link
-              href="/admin/orders/create"
+              href="/admin/create"
               className="rounded-xl bg-[#221C18] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#3A2F28]"
             >
               + Create order
@@ -298,10 +299,7 @@ export default function AdminOrdersPage() {
 
 function OrderRow({ order }: { order: AdminOrder }) {
   return (
-    <Link
-      href={`/admin/orders/${order.id}`}
-      className="grid grid-cols-[1.3fr_1.2fr_1fr_1fr_1fr_120px] gap-4 px-5 py-4 text-sm transition hover:bg-[#FFF9F1]"
-    >
+    <div className="grid grid-cols-[1.3fr_1.2fr_1fr_1fr_1fr] gap-4 px-5 py-4 text-sm">
       <div className="min-w-0">
         <p className="truncate font-medium text-[#241E1A]">
           {order.title || "Untitled order"}
@@ -349,12 +347,7 @@ function OrderRow({ order }: { order: AdminOrder }) {
         {formatDateTime(order.updatedAt)}
       </p>
 
-      <div className="text-right">
-        <span className="rounded-full border border-[#DED2C5] px-3 py-1 text-xs text-black/55">
-          View
-        </span>
-      </div>
-    </Link>
+    </div>
   );
 }
 

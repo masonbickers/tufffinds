@@ -5,7 +5,11 @@ import { use, useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../../_components/AdminShell";
-import type { AdminClient, ClientProfile } from "../../admin-types";
+import type {
+  AdminClient,
+  ClientProfile,
+  FirestoreTimestampValue,
+} from "../../admin-types";
 import {
   formatDateTime,
   getEmptyProfile,
@@ -40,14 +44,14 @@ export default function AdminClientDetailPage({ params }: PageProps) {
         }
 
         const data = snapshot.data() as {
-          createdAt?: any;
+          createdAt?: FirestoreTimestampValue;
           email?: string;
           fullName?: string;
           onboardingCompleted?: boolean;
           phoneNumber?: string;
           phoneNumberNormalized?: string;
           profile?: Partial<ClientProfile> | null;
-          updatedAt?: any;
+          updatedAt?: FirestoreTimestampValue;
         };
 
         const profile = data.profile ?? {};
