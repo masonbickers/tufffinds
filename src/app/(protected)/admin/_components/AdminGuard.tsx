@@ -2,13 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import {
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-  type User,
-} from "firebase/auth";
-import { auth, db, googleProvider } from "@/app/lib/firebase";
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { auth, db } from "@/app/lib/firebase";
+import AdminSignInOptions from "./AdminSignInOptions";
 
 type AdminUserRecord = {
   active?: boolean;
@@ -21,7 +17,6 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   const [adminReady, setAdminReady] = useState(false);
   const [allowed, setAllowed] = useState(false);
   const [message, setMessage] = useState("");
-  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(
     () =>
@@ -69,26 +64,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   if (!user) {
     return (
       <AdminGateMessage title="Admin sign in required">
-        <button
-          type="button"
-          disabled={signingIn}
-          onClick={async () => {
-            setSigningIn(true);
-            setMessage("");
-            try {
-              await signInWithPopup(auth, googleProvider);
-            } catch (error) {
-              console.error("Admin sign in failed", error);
-              setMessage("Sign in failed. Please try again.");
-            } finally {
-              setSigningIn(false);
-            }
-          }}
-          className="mt-6 rounded-full bg-[#40342F] px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {signingIn ? "Signing in…" : "Sign in with Google"}
-        </button>
-        {message ? <p className="mt-4 text-sm text-[#9F3A2A]">{message}</p> : null}
+        <AdminSignInOptions />
       </AdminGateMessage>
     );
   }

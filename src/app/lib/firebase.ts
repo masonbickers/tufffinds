@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const requiredFirebaseEnv = {
@@ -56,6 +56,11 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
+export const microsoftProvider = new OAuthProvider("microsoft.com");
+
+microsoftProvider.setCustomParameters({
+  prompt: "select_account",
+});
 
 export async function initAnalytics() {
   if (typeof window === "undefined") return;

@@ -3,20 +3,17 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import {
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-  type User,
-} from "firebase/auth";
-import { auth, db, googleProvider } from "@/app/lib/firebase";
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { auth, db } from "@/app/lib/firebase";
+import AdminSignInOptions from "./AdminSignInOptions";
 
 type AdminSection =
   | "dashboard"
   | "clients"
   | "requests"
   | "messages"
-  | "orders";
+  | "orders"
+  | "email-signups";
 
 type AdminUserRecord = {
   active?: boolean;
@@ -47,6 +44,11 @@ const NAV_ITEMS: Array<{
   { href: "/admin/requests", label: "Requests", section: "requests" },
   { href: "/admin/orders", label: "Orders", section: "orders" },
   { href: "/admin/messages", label: "Messages", section: "messages" },
+  {
+    href: "/admin/email-signups",
+    label: "Email signups",
+    section: "email-signups",
+  },
 ];
 
 export default function AdminShell({
@@ -60,7 +62,6 @@ export default function AdminShell({
   const [adminAllowed, setAdminAllowed] = useState(false);
   const [adminRecord, setAdminRecord] = useState<AdminUserRecord | null>(null);
   const [adminError, setAdminError] = useState("");
-  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
@@ -128,26 +129,7 @@ export default function AdminShell({
             Please sign in to access admin.
           </h1>
 
-          <button
-            type="button"
-            disabled={signingIn}
-            onClick={async () => {
-              setSigningIn(true);
-              setAdminError("");
-
-              try {
-                await signInWithPopup(auth, googleProvider);
-              } catch (error) {
-                console.error("Admin sign in failed", error);
-                setAdminError("Sign in failed. Please try again.");
-              } finally {
-                setSigningIn(false);
-              }
-            }}
-            className="mt-8 rounded-full bg-[#40342F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#40342F]/90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {signingIn ? "Signing in…" : "Sign in with Google"}
-          </button>
+          <AdminSignInOptions />
 
           {adminError ? (
             <p className="mt-4 text-sm text-[#9F3A2A]" role="alert">

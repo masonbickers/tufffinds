@@ -261,9 +261,14 @@ export default function CookiePolicyPage() {
 
     {/* Bottom bar */}
     <div className="border-t border-white/10">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 text-[10px] uppercase tracking-[0.22em] text-white/50">
+      <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-4 text-[10px] uppercase tracking-[0.22em] text-white/50 sm:flex-row sm:items-center sm:justify-between">
         <p>© {new Date().getFullYear()} Tufffinds — All rights reserved</p>
-        <p className="hidden sm:block">London · Global sourcing</p>
+        <div className="flex items-center gap-4">
+          <p className="hidden sm:block">London · Global sourcing</p>
+          <Link href="/admin" className="transition hover:text-white">
+            Admin
+          </Link>
+        </div>
       </div>
     </div>
   </div>
