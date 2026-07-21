@@ -13,6 +13,7 @@ import AdminShell from "../../_components/AdminShell";
 import type {
   ActivityEvent,
   AdminRequest,
+  FirestoreTimestampValue,
   RequestDetail,
   RequestStatus,
 } from "../../admin-types";
@@ -90,10 +91,10 @@ export default function AdminRequestDetailPage({ params }: PageProps) {
         const data = snapshot.data() as {
           clientEmail?: string;
           clientId?: string;
-          createdAt?: any;
+          createdAt?: FirestoreTimestampValue;
           detail?: RequestDetail;
           status?: RequestStatus;
-          updatedAt?: any;
+          updatedAt?: FirestoreTimestampValue;
         };
 
         const status = data.status ?? data.detail?.status ?? "submitted";

@@ -3,8 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { auth, db } from "@/app/lib/firebase";
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  type User,
+} from "firebase/auth";
+import { auth, db, googleProvider } from "@/app/lib/firebase";
 
 type AdminSection =
   | "dashboard"
@@ -32,7 +37,6 @@ type AdminShellProps = {
   metrics?: AdminMetrics;
 };
 
-const ADMIN_EMAIL_DOMAIN = "@tufffinds.com";
 const NAV_ITEMS: Array<{
   href: string;
   label: string;
@@ -56,6 +60,7 @@ export default function AdminShell({
   const [adminAllowed, setAdminAllowed] = useState(false);
   const [adminRecord, setAdminRecord] = useState<AdminUserRecord | null>(null);
   const [adminError, setAdminError] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
@@ -87,13 +92,8 @@ export default function AdminShell({
           ? (snapshot.data() as AdminUserRecord)
           : null;
 
-        const domainAuthorized =
-          user.email?.toLowerCase().endsWith(ADMIN_EMAIL_DOMAIN) ?? false;
-
         setAdminRecord(data);
-        setAdminAllowed(
-          Boolean((data?.active && data?.role === "admin") || domainAuthorized),
-        );
+        setAdminAllowed(Boolean(data?.active && data?.role === "admin"));
         setAdminReady(true);
       },
       (error) => {
@@ -127,6 +127,33 @@ export default function AdminShell({
           <h1 className="mt-4 font-serif text-4xl">
             Please sign in to access admin.
           </h1>
+
+          <button
+            type="button"
+            disabled={signingIn}
+            onClick={async () => {
+              setSigningIn(true);
+              setAdminError("");
+
+              try {
+                await signInWithPopup(auth, googleProvider);
+              } catch (error) {
+                console.error("Admin sign in failed", error);
+                setAdminError("Sign in failed. Please try again.");
+              } finally {
+                setSigningIn(false);
+              }
+            }}
+            className="mt-8 rounded-full bg-[#40342F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#40342F]/90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {signingIn ? "Signing in…" : "Sign in with Google"}
+          </button>
+
+          {adminError ? (
+            <p className="mt-4 text-sm text-[#9F3A2A]" role="alert">
+              {adminError}
+            </p>
+          ) : null}
         </div>
       </main>
     );

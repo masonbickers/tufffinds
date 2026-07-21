@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import NewsletterForm from "../_components/NewsletterForm";
 
 export default function TermsOfUsePage() {
   const [scrolled, setScrolled] = useState(false);
@@ -56,18 +58,18 @@ export default function TermsOfUsePage() {
 
           <div className="hidden md:flex items-center gap-6">
             <nav className="flex items-center gap-6 text-[11px] tracking-[0.26em] uppercase text-black/70">
-              <a href="/" className="transition hover:text-black">Home</a>
-              <a href="/#about" className="transition hover:text-black">About</a>
-              <a href="/#services" className="transition hover:text-black">Services</a>
-              <a href="/#contact" className="transition hover:text-black">Contact</a>
+              <Link href="/" className="transition hover:text-black">Home</Link>
+              <Link href="/#about" className="transition hover:text-black">About</Link>
+              <Link href="/#services" className="transition hover:text-black">Services</Link>
+              <Link href="/#contact" className="transition hover:text-black">Contact</Link>
             </nav>
 
-            <a
+            <Link
               href="/#contact"
               className="rounded-full border border-black/30 px-5 py-2.5 text-[10px] font-semibold tracking-[0.22em] uppercase text-black/90 transition hover:border-black"
             >
               Enquire
-            </a>
+            </Link>
           </div>
         </div>
       </header>
@@ -187,6 +189,7 @@ export default function TermsOfUsePage() {
           width={220}
           height={56}
           quality={100}
+          priority
           className="h-6 w-auto select-none [filter:brightness(0)_saturate(100%)_invert(92%)_sepia(12%)_saturate(243%)_hue-rotate(337deg)_brightness(106%)_contrast(90%)]"
         />
 
@@ -194,22 +197,7 @@ export default function TermsOfUsePage() {
           Join for updates, edits, and early access to sourcing drops.
         </p>
 
-        <form
-          className="mt-5 flex max-w-md items-center gap-3"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <input
-            type="email"
-            placeholder="Your email"
-            className="h-10 w-full rounded-full border border-white/20 bg-transparent px-5 text-sm text-white placeholder:text-white/45 outline-none transition focus:border-white/40"
-          />
-          <button
-            type="submit"
-            className="h-10 rounded-full bg-white px-6 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#40342F] transition hover:bg-white/90"
-          >
-            Join
-          </button>
-        </form>
+        <NewsletterForm compact page="/terms" />
       </div>
 
       {/* Right: links */}
@@ -222,17 +210,17 @@ export default function TermsOfUsePage() {
             </div>
             <ul className="mt-4 space-y-2.5 text-sm text-white/70">
               <li>
-                <a
-                  href="/version-1#contact"
+                <Link
+                  href="/#contact"
                   className="transition hover:text-white"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/version-1/faq" className="transition hover:text-white">
+                <Link href="/faq" className="transition hover:text-white">
                   FAQ
-                </a>
+                </Link>
               </li>
               <li>
                 <a
@@ -243,12 +231,12 @@ export default function TermsOfUsePage() {
                 </a>
               </li>
               <li>
-                <a
-                  href="/version-1#about"
+                <Link
+                  href="/#about"
                   className="transition hover:text-white"
                 >
                   About Tufffinds
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -260,20 +248,20 @@ export default function TermsOfUsePage() {
             </div>
             <ul className="mt-4 space-y-2.5 text-sm text-white/70">
               <li>
-                <a
-                  href="/version-1/privacy-policy"
+                <Link
+                  href="/privacy"
                   className="transition hover:text-white"
                 >
                   Privacy policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="/version-1/terms"
+                <Link
+                  href="/terms"
                   className="transition hover:text-white"
                 >
                   Terms of use
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

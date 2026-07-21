@@ -186,7 +186,7 @@ export default function CreateOrderPage() {
     setIsCreating(true);
 
     try {
-      const orderRef = await addDoc(collection(db, "orders"), {
+      await addDoc(collection(db, "orders"), {
         clientId: form.clientId,
         clientEmail: form.clientEmail.trim(),
         requestId: form.requestId.trim(),
@@ -218,7 +218,7 @@ export default function CreateOrderPage() {
         updatedAt: serverTimestamp(),
       });
 
-      router.push(`/admin/orders/${orderRef.id}`);
+      router.push("/admin/orders");
     } catch (createError) {
       console.error("Failed to create manual order", createError);
       setError("Could not create manual order.");

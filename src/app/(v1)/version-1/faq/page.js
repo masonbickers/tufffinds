@@ -2,7 +2,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import NewsletterForm from "../_components/NewsletterForm";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -205,7 +207,7 @@ export default function FAQPage() {
             scrolled || mobileMenuOpen ? "border-b border-[#40342F]/10" : ""
           )}
         >
-          <a href="/#home" aria-label="Tufffinds home" onClick={() => setMobileMenuOpen(false)}>
+          <Link href="/#home" aria-label="Tufffinds home" onClick={() => setMobileMenuOpen(false)}>
             <Image
               src="/finallogobrown.png"
               alt="Tufffinds"
@@ -214,23 +216,23 @@ export default function FAQPage() {
               priority
               className="h-5 w-auto select-none sm:h-6"
             />
-          </a>
+          </Link>
 
           <div className="hidden items-center gap-6 md:flex">
             <nav className="flex items-center gap-6 text-[11px] tracking-[0.26em] uppercase text-black/70">
               {navItems.map(([label, href]) => (
-                <a key={href} href={href} className="transition hover:text-black">
+                <Link key={href} href={href} className="transition hover:text-black">
                   {label}
-                </a>
+                </Link>
               ))}
             </nav>
 
-            <a
+            <Link
               href="/#contact"
               className="rounded-full border border-[#40342F]/30 px-5 py-2.5 text-[10px] font-semibold tracking-[0.22em] uppercase text-[#40342F] transition hover:border-[#40342F]/60"
             >
               Enquire
-            </a>
+            </Link>
           </div>
 
           <button
@@ -272,14 +274,14 @@ export default function FAQPage() {
             className="overflow-hidden rounded-[24px] border border-[#40342F]/10 bg-[#F8F7F3] p-3 shadow-[0_24px_70px_rgba(64,52,47,0.12)]"
           >
             {navItems.map(([label, href]) => (
-              <a
+              <Link
                 key={href}
                 href={href}
                 className="block rounded-xl px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/70 transition hover:bg-[#40342F]/[0.04]"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
@@ -332,12 +334,12 @@ export default function FAQPage() {
               )}
               style={revealStyle(320)}
             >
-              <a
+              <Link
                 href="/#contact"
                 className="min-h-12 rounded-full bg-[#40342F] px-6 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99] sm:px-9 sm:tracking-[0.22em]"
               >
                 Ask a question
-              </a>
+              </Link>
 
               <a
                 href="mailto:info@tufffinds.com"
@@ -443,12 +445,12 @@ export default function FAQPage() {
             </p>
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-              <a
+              <Link
                 href="/#contact"
                 className="min-h-12 rounded-full bg-[#40342F] px-9 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white transition hover:bg-[#40342F]/90 active:scale-[0.99]"
               >
                 Message us
-              </a>
+              </Link>
 
               <a
                 href="mailto:info@tufffinds.com"
@@ -471,6 +473,7 @@ export default function FAQPage() {
                 alt="Tufffinds"
                 width={220}
                 height={56}
+                priority
                 className="h-6 w-auto select-none [filter:brightness(0)_saturate(100%)_invert(92%)_sepia(12%)_saturate(243%)_hue-rotate(337deg)_brightness(106%)_contrast(90%)]"
               />
 
@@ -478,23 +481,7 @@ export default function FAQPage() {
                 Join for updates, edits, and early access to sourcing drops.
               </p>
 
-              <form
-                className="mt-5 flex max-w-md flex-col gap-3 sm:flex-row sm:items-center"
-                onSubmit={(e) => e.preventDefault()}
-              >
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="h-11 w-full rounded-full border border-white/20 bg-transparent px-5 text-[16px] text-white outline-none transition placeholder:text-white/45 focus:border-white/40 sm:h-10 sm:text-sm"
-                />
-
-                <button
-                  type="submit"
-                  className="h-11 rounded-full bg-white px-6 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#40342F] transition hover:bg-white/90 active:scale-[0.99] sm:h-10"
-                >
-                  Join
-                </button>
-              </form>
+              <NewsletterForm page="/faq" />
             </div>
 
             <div className="md:col-span-7 md:col-start-7">
@@ -506,14 +493,14 @@ export default function FAQPage() {
 
                   <ul className="mt-4 space-y-2.5 text-sm text-white/70">
                     <li>
-                      <a href="/#contact" className="transition hover:text-white">
+                      <Link href="/#contact" className="transition hover:text-white">
                         Contact
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/faq" className="transition hover:text-white">
+                      <Link href="/faq" className="transition hover:text-white">
                         FAQ
-                      </a>
+                      </Link>
                     </li>
                     <li>
                       <a href="mailto:info@tufffinds.com" className="transition hover:text-white">
@@ -521,9 +508,9 @@ export default function FAQPage() {
                       </a>
                     </li>
                     <li>
-                      <a href="/#about" className="transition hover:text-white">
+                      <Link href="/#about" className="transition hover:text-white">
                         About Tufffinds
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -535,14 +522,14 @@ export default function FAQPage() {
 
                   <ul className="mt-4 space-y-2.5 text-sm text-white/70">
                     <li>
-                      <a href="/privacy-policy" className="transition hover:text-white">
+                      <Link href="/privacy" className="transition hover:text-white">
                         Privacy policy
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/terms" className="transition hover:text-white">
+                      <Link href="/terms" className="transition hover:text-white">
                         Terms of use
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>

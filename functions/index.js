@@ -30,19 +30,6 @@ const WHATSAPP_URL =
 
 const LOGO_URL = process.env.BRAND_LOGO_URL || `${SITE_URL}/finallogobrown.png`;
 
-function wordmarkHtml({
-  align = "center",
-  color = BRAND.black,
-  fontSize = 30,
-  margin = "0 auto",
-} = {}) {
-  return `
-    <div style="margin:${margin}; text-align:${align}; font-family:Georgia, 'Times New Roman', serif; font-size:${fontSize}px; line-height:1; font-style:italic; letter-spacing:-0.4px; color:${color}; white-space:nowrap;">
-      TUFFFINDS
-    </div>
-  `;
-}
-
 function logoHtml({ width = 220, margin = "0 auto 8px auto" } = {}) {
   return `
     <div style="margin:${margin}; text-align:center;">
