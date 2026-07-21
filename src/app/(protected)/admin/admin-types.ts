@@ -143,6 +143,97 @@ export type AdminRequest = {
   updatedAt: string;
 };
 
+export type Currency = "GBP" | "EUR" | "USD";
+
+export type OrderStatus =
+  | "created"
+  | "invoice_sent"
+  | "paid"
+  | "purchased"
+  | "quality_check"
+  | "dispatched"
+  | "delivered"
+  | "closed"
+  | "cancelled";
+
+export type RefundStatus =
+  | "not_required"
+  | "pending"
+  | "partial"
+  | "completed"
+  | "failed";
+
+export type QualityCheckStatus = "pending" | "passed" | "issue";
+
+export type OrderWorkflow = {
+  cancellation: {
+    cancelledAt: FirestoreTimestampValue;
+    previousStatus: OrderStatus | null;
+    reason: string;
+  };
+  fulfilment: {
+    deliveredDate: string;
+    dispatchDate: string;
+    expectedDeliveryDate: string;
+    noTrackingConfirmed: boolean;
+    qualityCheckNotes: string;
+    qualityCheckStatus: QualityCheckStatus;
+    qualityCheckedAt: FirestoreTimestampValue;
+  };
+  payment: {
+    invoiceAmount: number | null;
+    invoiceDate: string;
+    paidAmount: number | null;
+    paymentDate: string;
+    paymentNotes: string;
+    paymentReference: string;
+  };
+  purchase: {
+    purchaseDate: string;
+    purchaseNotes: string;
+    purchaseWithoutReferenceConfirmed: boolean;
+    supplierContact: string;
+    supplierReference: string;
+  };
+  refund: {
+    amount: number | null;
+    date: string;
+    notes: string;
+    reference: string;
+    status: RefundStatus;
+  };
+};
+
+export type AdminOrder = {
+  approvedOptionId: string;
+  brand: string;
+  clientEmail: string;
+  clientId: string;
+  clientName: string;
+  clientPhone: string;
+  colour: string;
+  costPrice: number;
+  courier: string;
+  createdAt: string;
+  currency: Currency;
+  id: string;
+  invoiceNumber: string;
+  invoiceUrl: string;
+  item: string;
+  notes: string;
+  orderWorkflow: OrderWorkflow;
+  paymentMethod: string;
+  requestId: string;
+  salePrice: number;
+  size: string;
+  status: OrderStatus;
+  supplier: string;
+  title: string;
+  trackingNumber: string;
+  trackingUrl: string;
+  updatedAt: string;
+};
+
 export type ThreadLifecycleLink = {
   href: string;
   label: string;

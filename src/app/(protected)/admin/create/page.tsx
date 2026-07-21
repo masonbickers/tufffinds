@@ -15,14 +15,20 @@ import { useRouter } from "next/navigation";
 
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
-import type { AdminClient, ClientProfile, FirestoreTimestampValue } from "../admin-types";
+import type {
+  AdminClient,
+  ClientProfile,
+  Currency,
+  FirestoreTimestampValue,
+} from "../admin-types";
 import { getEmptyProfile, normalizeTimestamp } from "../admin-utils";
-
-type Currency = "GBP" | "EUR" | "USD";
+import { getEmptyOrderWorkflow } from "../order-utils";
 
 type OrderForm = {
   clientId: string;
   clientEmail: string;
+  clientName: string;
+  clientPhone: string;
   requestId: string;
   title: string;
   brand: string;
@@ -45,6 +51,8 @@ type OrderForm = {
 const emptyOrderForm: OrderForm = {
   clientId: "",
   clientEmail: "",
+  clientName: "",
+  clientPhone: "",
   requestId: "",
   title: "",
   brand: "",
@@ -165,6 +173,8 @@ export default function CreateOrderPage() {
       ...current,
       clientId,
       clientEmail: selectedClient?.email ?? "",
+      clientName: selectedClient?.fullName ?? "",
+      clientPhone: selectedClient?.phoneNumber ?? "",
     }));
   }
 
@@ -187,8 +197,11 @@ export default function CreateOrderPage() {
 
     try {
       await addDoc(collection(db, "orders"), {
+        approvedOptionId: "",
         clientId: form.clientId,
         clientEmail: form.clientEmail.trim(),
+        clientName: form.clientName.trim(),
+        clientPhone: form.clientPhone.trim(),
         requestId: form.requestId.trim(),
 
         title: form.title.trim(),
@@ -213,6 +226,7 @@ export default function CreateOrderPage() {
         trackingUrl: form.trackingUrl.trim(),
 
         notes: form.notes.trim(),
+        orderWorkflow: getEmptyOrderWorkflow(),
 
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),

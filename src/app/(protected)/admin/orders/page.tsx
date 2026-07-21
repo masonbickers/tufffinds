@@ -10,74 +10,18 @@ import {
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
-import type { FirestoreTimestampValue } from "../admin-types";
+import type { AdminOrder, Currency, OrderStatus } from "../admin-types";
 import {
   classNames,
   formatDateTime,
-  normalizeTimestamp,
 } from "../admin-utils";
-
-type OrderStatus =
-  | "created"
-  | "invoice_sent"
-  | "paid"
-  | "purchased"
-  | "quality_check"
-  | "dispatched"
-  | "delivered"
-  | "closed"
-  | "cancelled";
-
-type Currency = "GBP" | "EUR" | "USD";
-
-type AdminOrder = {
-  id: string;
-  clientId: string;
-  clientEmail: string;
-  requestId?: string;
-  title: string;
-  brand: string;
-  item: string;
-  size: string;
-  colour: string;
-  status: OrderStatus;
-  salePrice: number;
-  costPrice: number;
-  currency: Currency;
-  invoiceNumber: string;
-  invoiceUrl: string;
-  paymentMethod: string;
-  supplier: string;
-  courier: string;
-  trackingNumber: string;
-  trackingUrl: string;
-  notes: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-function isCurrency(value: unknown): value is Currency {
-  return value === "GBP" || value === "EUR" || value === "USD";
-}
-
-function isOrderStatus(value: unknown): value is OrderStatus {
-  return (
-    value === "created" ||
-    value === "invoice_sent" ||
-    value === "paid" ||
-    value === "purchased" ||
-    value === "quality_check" ||
-    value === "dispatched" ||
-    value === "delivered" ||
-    value === "closed" ||
-    value === "cancelled"
-  );
-}
+import { getOrderNextAction, parseAdminOrder } from "../order-utils";
 
 export default function AdminOrdersPage() {
   const [clientsCount, setClientsCount] = useState(0);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -110,58 +54,9 @@ export default function AdminOrdersPage() {
     const unsubscribe = onSnapshot(
       ordersQuery,
       (snapshot) => {
-        const nextOrders = snapshot.docs.map((entry) => {
-          const data = entry.data() as {
-            clientId?: string;
-            clientEmail?: string;
-            requestId?: string;
-            title?: string;
-            brand?: string;
-            item?: string;
-            size?: string;
-            colour?: string;
-            status?: unknown;
-            salePrice?: number;
-            costPrice?: number;
-            currency?: unknown;
-            invoiceNumber?: string;
-            invoiceUrl?: string;
-            paymentMethod?: string;
-            supplier?: string;
-            courier?: string;
-            trackingNumber?: string;
-            trackingUrl?: string;
-            notes?: string;
-            createdAt?: FirestoreTimestampValue;
-            updatedAt?: FirestoreTimestampValue;
-          };
-
-          return {
-            id: entry.id,
-            clientId: data.clientId ?? "",
-            clientEmail: data.clientEmail ?? "",
-            requestId: data.requestId ?? "",
-            title: data.title ?? "Untitled order",
-            brand: data.brand ?? "",
-            item: data.item ?? "",
-            size: data.size ?? "",
-            colour: data.colour ?? "",
-            status: isOrderStatus(data.status) ? data.status : "created",
-            salePrice: Number(data.salePrice ?? 0),
-            costPrice: Number(data.costPrice ?? 0),
-            currency: isCurrency(data.currency) ? data.currency : "GBP",
-            invoiceNumber: data.invoiceNumber ?? "",
-            invoiceUrl: data.invoiceUrl ?? "",
-            paymentMethod: data.paymentMethod ?? "",
-            supplier: data.supplier ?? "",
-            courier: data.courier ?? "",
-            trackingNumber: data.trackingNumber ?? "",
-            trackingUrl: data.trackingUrl ?? "",
-            notes: data.notes ?? "",
-            createdAt: normalizeTimestamp(data.createdAt),
-            updatedAt: normalizeTimestamp(data.updatedAt),
-          } satisfies AdminOrder;
-        });
+        const nextOrders = snapshot.docs.map((entry) =>
+          parseAdminOrder(entry.id, entry.data()),
+        );
 
         setOrders(nextOrders);
         setOrdersLoading(false);
@@ -180,13 +75,15 @@ export default function AdminOrdersPage() {
   const filteredOrders = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    if (!term) return orders;
+    return orders.filter((order) => {
+      if (statusFilter !== "all" && order.status !== statusFilter) return false;
+      if (!term) return true;
 
-    return orders.filter((order) =>
-      [
+      return [
         order.title,
         order.clientEmail,
         order.clientId,
+        order.clientName,
         order.brand,
         order.item,
         order.status,
@@ -194,9 +91,19 @@ export default function AdminOrdersPage() {
         order.trackingNumber,
         order.supplier,
         order.courier,
-      ].some((value) => String(value ?? "").toLowerCase().includes(term)),
-    );
-  }, [orders, search]);
+      ].some((value) => String(value ?? "").toLowerCase().includes(term));
+    });
+  }, [orders, search, statusFilter]);
+
+  const summary = useMemo(
+    () => ({
+      awaitingPayment: orders.filter((order) => order.status === "invoice_sent").length,
+      inFulfilment: orders.filter((order) =>
+        ["paid", "purchased", "quality_check", "dispatched"].includes(order.status),
+      ).length,
+    }),
+    [orders],
+  );
 
   return (
     <AdminShell
@@ -226,14 +133,24 @@ export default function AdminOrdersPage() {
           </div>
 
           <div className="flex flex-wrap items-end gap-3">
-            <div className="rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] px-6 py-4">
+            <div className="rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] px-5 py-3">
               <p className="text-[10px] uppercase tracking-[0.24em] text-black/40">
                 Total orders
               </p>
 
-              <p className="mt-2 text-3xl font-semibold text-[#241E1A]">
+              <p className="mt-1 text-2xl font-semibold text-[#241E1A]">
                 {orders.length}
               </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] px-5 py-3">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-black/40">Awaiting payment</p>
+              <p className="mt-1 text-2xl font-semibold text-[#241E1A]">{summary.awaitingPayment}</p>
+            </div>
+
+            <div className="rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] px-5 py-3">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-black/40">In fulfilment</p>
+              <p className="mt-1 text-2xl font-semibold text-[#241E1A]">{summary.inFulfilment}</p>
             </div>
 
             <Link
@@ -251,21 +168,26 @@ export default function AdminOrdersPage() {
           </div>
         ) : null}
 
-        <div className="rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] p-4">
+        <div className="grid gap-3 rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] p-4 md:grid-cols-[minmax(0,1fr)_220px]">
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search orders, client, brand, status..."
             className="w-full rounded-xl border border-[#DED2C5] bg-white px-4 py-3 text-sm text-[#241E1A] outline-none placeholder:text-black/35 focus:border-[#B59674]"
           />
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "all" | OrderStatus)} className="rounded-xl border border-[#DED2C5] bg-white px-4 py-3 text-sm text-[#241E1A] outline-none focus:border-[#B59674]">
+            <option value="all">All statuses</option>
+            {(["created", "invoice_sent", "paid", "purchased", "quality_check", "dispatched", "delivered", "closed", "cancelled"] as OrderStatus[]).map((status) => <option key={status} value={status}>{formatStatusLabel(status)}</option>)}
+          </select>
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-[#DED2C5] bg-white">
-          <div className="grid grid-cols-[1.3fr_1.2fr_1fr_1fr_1fr_120px] gap-4 border-b border-[#E9DED3] bg-[#FBF7F2] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-black/40">
+          <div className="grid grid-cols-[1.2fr_1fr_0.8fr_0.8fr_1fr_0.9fr_80px] gap-4 border-b border-[#E9DED3] bg-[#FBF7F2] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-black/40">
             <p>Order</p>
             <p>Client</p>
             <p>Status</p>
             <p>Value</p>
+            <p>Next action</p>
             <p>Updated</p>
             <p className="text-right">Open</p>
           </div>
@@ -299,7 +221,7 @@ export default function AdminOrdersPage() {
 
 function OrderRow({ order }: { order: AdminOrder }) {
   return (
-    <div className="grid grid-cols-[1.3fr_1.2fr_1fr_1fr_1fr] gap-4 px-5 py-4 text-sm">
+    <Link href={`/admin/orders/${order.id}`} className="grid grid-cols-[1.2fr_1fr_0.8fr_0.8fr_1fr_0.9fr_80px] gap-4 px-5 py-4 text-sm transition hover:bg-[#FFF9F1]">
       <div className="min-w-0">
         <p className="truncate font-medium text-[#241E1A]">
           {order.title || "Untitled order"}
@@ -314,7 +236,7 @@ function OrderRow({ order }: { order: AdminOrder }) {
 
       <div className="min-w-0">
         <p className="truncate text-black/60">
-          {order.clientEmail || "No email"}
+          {order.clientName || order.clientEmail || "Unknown client"}
         </p>
 
         <p className="mt-1 truncate text-xs text-black/40">
@@ -343,11 +265,14 @@ function OrderRow({ order }: { order: AdminOrder }) {
         </p>
       </div>
 
+      <p className="text-black/60">{getOrderNextAction(order)}</p>
+
       <p className="truncate text-black/60">
         {formatDateTime(order.updatedAt)}
       </p>
 
-    </div>
+      <div className="text-right"><span className="rounded-full border border-[#DED2C5] px-3 py-1 text-xs text-black/55">View</span></div>
+    </Link>
   );
 }
 
