@@ -29,6 +29,23 @@ export type ClientProfile = {
   stylePreferences: string[];
 };
 
+export type ClientArchive = {
+  archivedAt: string;
+  archivedByUid: string;
+  reason: string;
+  restoredAt: string;
+  restoredByUid: string;
+};
+
+export type ClientOnboardingAdmin = {
+  completedAt: string;
+  completedByUid: string;
+  overrideReason: string;
+  overriddenMissingFields: string[];
+  reopenedAt: string;
+  reopenedByUid: string;
+};
+
 export type AdminClient = {
   createdAt: string;
   email: string;
@@ -39,6 +56,13 @@ export type AdminClient = {
   phoneNumberNormalized: string;
   profile: ClientProfile;
   updatedAt: string;
+};
+
+export type ManagedAdminClient = AdminClient & {
+  adminNotes: string;
+  archive: ClientArchive;
+  archived: boolean;
+  onboardingAdmin: ClientOnboardingAdmin;
 };
 
 export type RequestStatus =

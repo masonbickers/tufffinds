@@ -1,4 +1,11 @@
-import type { FirestoreTimestampValue, RequestStatus } from "./admin-types";
+import type {
+  ClientArchive,
+  ClientOnboardingAdmin,
+  ClientProfile,
+  FirestoreTimestampValue,
+  ManagedAdminClient,
+  RequestStatus,
+} from "./admin-types";
 
 export function normalizeTimestamp(value?: FirestoreTimestampValue) {
   if (!value) return "";
@@ -91,4 +98,128 @@ export function getEmptyProfile() {
     },
     stylePreferences: [],
   };
+}
+
+type ClientDocumentData = {
+  adminNotes?: unknown;
+  archive?: Partial<Record<keyof ClientArchive, unknown>> | null;
+  archived?: unknown;
+  createdAt?: FirestoreTimestampValue;
+  email?: unknown;
+  fullName?: unknown;
+  onboardingAdmin?: Partial<Record<keyof ClientOnboardingAdmin, unknown>> | null;
+  onboardingCompleted?: unknown;
+  phoneNumber?: unknown;
+  phoneNumberNormalized?: unknown;
+  profile?: Partial<ClientProfile> | null;
+  updatedAt?: FirestoreTimestampValue;
+};
+
+function text(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function textList(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+export function parseAdminClient(
+  id: string,
+  data: ClientDocumentData,
+): ManagedAdminClient {
+  const emptyProfile = getEmptyProfile();
+  const profile = data.profile ?? {};
+  const fallbackName = text(profile.fullName) || text(data.fullName);
+  const fallbackPhone = text(profile.phoneNumber) || text(data.phoneNumber);
+  const archive = data.archive ?? {};
+  const onboardingAdmin = data.onboardingAdmin ?? {};
+
+  return {
+    id,
+    adminNotes: text(data.adminNotes),
+    archived: data.archived === true,
+    archive: {
+      archivedAt: normalizeTimestamp(archive.archivedAt as FirestoreTimestampValue),
+      archivedByUid: text(archive.archivedByUid),
+      reason: text(archive.reason),
+      restoredAt: normalizeTimestamp(archive.restoredAt as FirestoreTimestampValue),
+      restoredByUid: text(archive.restoredByUid),
+    },
+    email: text(data.email),
+    fullName: fallbackName,
+    phoneNumber: fallbackPhone,
+    phoneNumberNormalized: text(data.phoneNumberNormalized),
+    onboardingCompleted: data.onboardingCompleted === true,
+    onboardingAdmin: {
+      completedAt: normalizeTimestamp(
+        onboardingAdmin.completedAt as FirestoreTimestampValue,
+      ),
+      completedByUid: text(onboardingAdmin.completedByUid),
+      overrideReason: text(onboardingAdmin.overrideReason),
+      overriddenMissingFields: textList(onboardingAdmin.overriddenMissingFields),
+      reopenedAt: normalizeTimestamp(
+        onboardingAdmin.reopenedAt as FirestoreTimestampValue,
+      ),
+      reopenedByUid: text(onboardingAdmin.reopenedByUid),
+    },
+    createdAt: normalizeTimestamp(data.createdAt),
+    updatedAt: normalizeTimestamp(data.updatedAt),
+    profile: {
+      ...emptyProfile,
+      ...profile,
+      fullName: text(profile.fullName) || fallbackName,
+      phoneNumber: text(profile.phoneNumber) || fallbackPhone,
+      clothingSizes: {
+        ...emptyProfile.clothingSizes,
+        ...(profile.clothingSizes ?? {}),
+      },
+      shippingAddress: {
+        ...emptyProfile.shippingAddress,
+        ...(profile.shippingAddress ?? {}),
+      },
+      stylePreferences: textList(profile.stylePreferences),
+      favoriteBrands: textList(profile.favoriteBrands),
+      dislikedBrands: textList(profile.dislikedBrands),
+      shoppingPriorities: textList(profile.shoppingPriorities),
+      contactPreferences: textList(profile.contactPreferences),
+    },
+  };
+}
+
+export function getMissingOnboardingFields(client: ManagedAdminClient) {
+  const fields: string[] = [];
+  const address = client.profile.shippingAddress;
+
+  if (!client.fullName.trim()) fields.push("Full name");
+  if (!isValidEmail(client.email)) fields.push("Valid email address");
+  if (!isValidPhone(client.phoneNumber)) fields.push("Valid phone number");
+  if (!address.line1.trim()) fields.push("Shipping address line 1");
+  if (!address.city.trim()) fields.push("Shipping city");
+  if (!address.postcode.trim()) fields.push("Shipping postcode");
+  if (!address.country.trim()) fields.push("Shipping country");
+
+  return fields;
+}
+
+export function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) && value.length <= 254;
+}
+
+export function isValidPhone(value: string) {
+  const trimmed = value.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  return (
+    trimmed.length >= 3 &&
+    trimmed.length <= 40 &&
+    digits.length >= 3 &&
+    /^[+\d\s().-]+$/.test(trimmed)
+  );
+}
+
+export function normalizePhoneNumber(value: string) {
+  const trimmed = value.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  return trimmed.startsWith("+") ? `+${digits}` : digits;
 }
