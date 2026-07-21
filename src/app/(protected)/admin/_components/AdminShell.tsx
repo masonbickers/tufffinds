@@ -13,7 +13,8 @@ type AdminSection =
   | "requests"
   | "messages"
   | "orders"
-  | "email-signups";
+  | "email-signups"
+  | "email-campaigns";
 
 type AdminUserRecord = {
   active?: boolean;
@@ -48,6 +49,11 @@ const NAV_ITEMS: Array<{
     href: "/admin/email-signups",
     label: "Email signups",
     section: "email-signups",
+  },
+  {
+    href: "/admin/email-campaigns",
+    label: "Email campaigns",
+    section: "email-campaigns",
   },
 ];
 

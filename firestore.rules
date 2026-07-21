@@ -127,6 +127,31 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    match /email_campaigns/{campaignId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /email_campaign_deliveries/{deliveryId} {
+      allow read, write: if false;
+    }
+
+    match /email_campaign_audits/{auditId} {
+      allow read, write: if false;
+    }
+
+    match /email_campaign_batches/{batchId} {
+      allow read, write: if false;
+    }
+
+    match /admin_email_test_audit/{auditId} {
+      allow read, write: if false;
+    }
+
+    match /admin_email_test_limits/{adminId} {
+      allow read, write: if false;
+    }
+
     match /requests/{requestId} {
       allow create: if validPublicRequest() || isAdmin();
       allow read, update, delete: if isAdmin();

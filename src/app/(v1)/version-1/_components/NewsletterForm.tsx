@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
@@ -89,6 +90,17 @@ export default function NewsletterForm({
           {status === "loading" ? "Joining…" : "Join"}
         </button>
       </form>
+      <p className="mt-3 max-w-md text-xs leading-5 text-white/55">
+        By joining, you agree to receive emails from Tufffinds. You can
+        unsubscribe at any time. Read our{" "}
+        <Link
+          href="/privacy"
+          className="text-white/75 underline decoration-white/30 underline-offset-2 transition hover:text-white"
+        >
+          Privacy Policy
+        </Link>
+        .
+      </p>
       {message ? (
         <p
           className={`mt-3 max-w-md text-sm ${
