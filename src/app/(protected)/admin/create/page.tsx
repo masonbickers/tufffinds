@@ -6,23 +6,33 @@ import type { ReactNode } from "react";
 import {
   addDoc,
   collection,
+  doc,
+  getDocs,
+  limit,
   onSnapshot,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
+  where,
 } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
-import type { AdminClient, ClientProfile, FirestoreTimestampValue } from "../admin-types";
+import type {
+  AdminClient,
+  ClientProfile,
+  Currency,
+  FirestoreTimestampValue,
+} from "../admin-types";
 import { getEmptyProfile, normalizeTimestamp } from "../admin-utils";
-
-type Currency = "GBP" | "EUR" | "USD";
 
 type OrderForm = {
   clientId: string;
   clientEmail: string;
+  clientName: string;
+  clientPhone: string;
   requestId: string;
   title: string;
   brand: string;
@@ -45,6 +55,8 @@ type OrderForm = {
 const emptyOrderForm: OrderForm = {
   clientId: "",
   clientEmail: "",
+  clientName: "",
+  clientPhone: "",
   requestId: "",
   title: "",
   brand: "",
@@ -165,6 +177,8 @@ export default function CreateOrderPage() {
       ...current,
       clientId,
       clientEmail: selectedClient?.email ?? "",
+      clientName: selectedClient?.fullName ?? "",
+      clientPhone: selectedClient?.phoneNumber ?? "",
     }));
   }
 
@@ -186,10 +200,14 @@ export default function CreateOrderPage() {
     setIsCreating(true);
 
     try {
-      await addDoc(collection(db, "orders"), {
+      const requestId = form.requestId.trim();
+      const orderData = {
+        approvedOptionId: "",
         clientId: form.clientId,
         clientEmail: form.clientEmail.trim(),
-        requestId: form.requestId.trim(),
+        clientName: form.clientName.trim(),
+        clientPhone: form.clientPhone.trim(),
+        requestId,
 
         title: form.title.trim(),
         brand: form.brand.trim(),
@@ -216,12 +234,39 @@ export default function CreateOrderPage() {
 
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      if (requestId) {
+        const existingOrders = await getDocs(
+          query(
+            collection(db, "orders"),
+            where("requestId", "==", requestId),
+            limit(1),
+          ),
+        );
+
+        if (!existingOrders.empty) throw new Error("ORDER_ALREADY_EXISTS");
+
+        await runTransaction(db, async (transaction) => {
+          const orderRef = doc(db, "orders", `request_${requestId}`);
+          const snapshot = await transaction.get(orderRef);
+
+          if (snapshot.exists()) throw new Error("ORDER_ALREADY_EXISTS");
+          transaction.set(orderRef, orderData);
+        });
+      } else {
+        await addDoc(collection(db, "orders"), orderData);
+      }
 
       router.push("/admin/orders");
     } catch (createError) {
       console.error("Failed to create manual order", createError);
-      setError("Could not create manual order.");
+      setError(
+        createError instanceof Error &&
+          createError.message === "ORDER_ALREADY_EXISTS"
+          ? "An order already exists for this request."
+          : "Could not create manual order.",
+      );
       setIsCreating(false);
     }
   }

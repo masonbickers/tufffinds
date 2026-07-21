@@ -104,6 +104,32 @@ export type RequestFulfilment = {
   deliveredAt?: string | null;
 };
 
+export type Currency = "GBP" | "EUR" | "USD";
+
+export type RequestItemOption = {
+  brand: string;
+  colour: string;
+  costPrice: number;
+  currency: Currency;
+  id: string;
+  item: string;
+  notes: string;
+  salePrice: number;
+  size: string;
+  supplier: string;
+  title: string;
+};
+
+export type RequestAdminWorkflow = {
+  approvedOptionId: string | null;
+  internalNotes: string;
+  itemOptions: RequestItemOption[];
+  missingInformation: string;
+  needsInfoReturnStatus: RequestStatus | null;
+  orderId: string | null;
+  sourcingProgress: string;
+};
+
 export type RequestDetail = {
   activitySummary: ActivityEvent[];
   assignedStylist?: string;
@@ -134,12 +160,57 @@ export type RequestDetail = {
 };
 
 export type AdminRequest = {
+  adminWorkflow: RequestAdminWorkflow;
   clientEmail: string;
   clientId: string;
+  clientName: string;
+  clientPhone: string;
   createdAt: string;
   detail: RequestDetail;
   id: string;
+  source: string;
   status: RequestStatus;
+  submittedFrom: string;
+  updatedAt: string;
+};
+
+export type OrderStatus =
+  | "created"
+  | "invoice_sent"
+  | "paid"
+  | "purchased"
+  | "quality_check"
+  | "dispatched"
+  | "delivered"
+  | "closed"
+  | "cancelled";
+
+export type AdminOrder = {
+  approvedOptionId: string;
+  brand: string;
+  clientEmail: string;
+  clientId: string;
+  clientName: string;
+  clientPhone: string;
+  colour: string;
+  costPrice: number;
+  courier: string;
+  createdAt: string;
+  currency: Currency;
+  id: string;
+  invoiceNumber: string;
+  invoiceUrl: string;
+  item: string;
+  notes: string;
+  paymentMethod: string;
+  requestId: string;
+  salePrice: number;
+  size: string;
+  status: OrderStatus;
+  supplier: string;
+  title: string;
+  trackingNumber: string;
+  trackingUrl: string;
   updatedAt: string;
 };
 
@@ -175,3 +246,15 @@ export type AdminThread = {
 };
 
 export type FirestoreTimestampValue = Timestamp | string | null | undefined;
+
+export function getEmptyRequestAdminWorkflow(): RequestAdminWorkflow {
+  return {
+    approvedOptionId: null,
+    internalNotes: "",
+    itemOptions: [],
+    missingInformation: "",
+    needsInfoReturnStatus: null,
+    orderId: null,
+    sourcingProgress: "",
+  };
+}

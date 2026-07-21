@@ -10,51 +10,17 @@ import {
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
-import type { FirestoreTimestampValue } from "../admin-types";
+import type {
+  AdminOrder,
+  Currency,
+  FirestoreTimestampValue,
+  OrderStatus,
+} from "../admin-types";
 import {
   classNames,
   formatDateTime,
   normalizeTimestamp,
 } from "../admin-utils";
-
-type OrderStatus =
-  | "created"
-  | "invoice_sent"
-  | "paid"
-  | "purchased"
-  | "quality_check"
-  | "dispatched"
-  | "delivered"
-  | "closed"
-  | "cancelled";
-
-type Currency = "GBP" | "EUR" | "USD";
-
-type AdminOrder = {
-  id: string;
-  clientId: string;
-  clientEmail: string;
-  requestId?: string;
-  title: string;
-  brand: string;
-  item: string;
-  size: string;
-  colour: string;
-  status: OrderStatus;
-  salePrice: number;
-  costPrice: number;
-  currency: Currency;
-  invoiceNumber: string;
-  invoiceUrl: string;
-  paymentMethod: string;
-  supplier: string;
-  courier: string;
-  trackingNumber: string;
-  trackingUrl: string;
-  notes: string;
-  createdAt: string;
-  updatedAt: string;
-};
 
 function isCurrency(value: unknown): value is Currency {
   return value === "GBP" || value === "EUR" || value === "USD";
@@ -112,8 +78,11 @@ export default function AdminOrdersPage() {
       (snapshot) => {
         const nextOrders = snapshot.docs.map((entry) => {
           const data = entry.data() as {
+            approvedOptionId?: string;
             clientId?: string;
             clientEmail?: string;
+            clientName?: string;
+            clientPhone?: string;
             requestId?: string;
             title?: string;
             brand?: string;
@@ -138,8 +107,11 @@ export default function AdminOrdersPage() {
 
           return {
             id: entry.id,
+            approvedOptionId: data.approvedOptionId ?? "",
             clientId: data.clientId ?? "",
             clientEmail: data.clientEmail ?? "",
+            clientName: data.clientName ?? "",
+            clientPhone: data.clientPhone ?? "",
             requestId: data.requestId ?? "",
             title: data.title ?? "Untitled order",
             brand: data.brand ?? "",
@@ -186,6 +158,8 @@ export default function AdminOrdersPage() {
       [
         order.title,
         order.clientEmail,
+        order.clientName,
+        order.clientPhone,
         order.clientId,
         order.brand,
         order.item,
@@ -299,7 +273,10 @@ export default function AdminOrdersPage() {
 
 function OrderRow({ order }: { order: AdminOrder }) {
   return (
-    <div className="grid grid-cols-[1.3fr_1.2fr_1fr_1fr_1fr] gap-4 px-5 py-4 text-sm">
+    <Link
+      href={`/admin/orders/${order.id}`}
+      className="grid grid-cols-[1.3fr_1.2fr_1fr_1fr_1fr_120px] gap-4 px-5 py-4 text-sm transition hover:bg-[#FFF9F1]"
+    >
       <div className="min-w-0">
         <p className="truncate font-medium text-[#241E1A]">
           {order.title || "Untitled order"}
@@ -314,7 +291,7 @@ function OrderRow({ order }: { order: AdminOrder }) {
 
       <div className="min-w-0">
         <p className="truncate text-black/60">
-          {order.clientEmail || "No email"}
+          {order.clientName || order.clientEmail || "Unknown client"}
         </p>
 
         <p className="mt-1 truncate text-xs text-black/40">
@@ -347,7 +324,12 @@ function OrderRow({ order }: { order: AdminOrder }) {
         {formatDateTime(order.updatedAt)}
       </p>
 
-    </div>
+      <div className="text-right">
+        <span className="rounded-full border border-[#DED2C5] px-3 py-1 text-xs text-black/55">
+          View
+        </span>
+      </div>
+    </Link>
   );
 }
 

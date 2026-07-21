@@ -8,9 +8,11 @@ import AdminShell from "../_components/AdminShell";
 import type {
   AdminRequest,
   FirestoreTimestampValue,
+  RequestAdminWorkflow,
   RequestDetail,
   RequestStatus,
 } from "../admin-types";
+import { getEmptyRequestAdminWorkflow } from "../admin-types";
 import {
   classNames,
   formatDateTime,
@@ -39,11 +41,16 @@ export default function AdminRequestsPage() {
       (snapshot) => {
         const nextRequests = snapshot.docs.map((entry) => {
           const data = entry.data() as {
+            adminWorkflow?: Partial<RequestAdminWorkflow>;
             clientEmail?: string;
             clientId?: string;
+            clientName?: string;
+            clientPhone?: string;
             createdAt?: FirestoreTimestampValue;
             detail?: RequestDetail;
+            source?: string;
             status?: RequestStatus;
+            submittedFrom?: string;
             updatedAt?: FirestoreTimestampValue;
           };
 
@@ -51,12 +58,23 @@ export default function AdminRequestsPage() {
 
           return {
             id: entry.id,
+            adminWorkflow: {
+              ...getEmptyRequestAdminWorkflow(),
+              ...(data.adminWorkflow ?? {}),
+              itemOptions: Array.isArray(data.adminWorkflow?.itemOptions)
+                ? data.adminWorkflow.itemOptions
+                : [],
+            },
             clientId: data.clientId ?? "",
             clientEmail: data.clientEmail ?? "",
+            clientName: data.clientName ?? "",
+            clientPhone: data.clientPhone ?? "",
             createdAt: normalizeTimestamp(data.createdAt),
             updatedAt: normalizeTimestamp(data.updatedAt),
             status,
             detail: data.detail ?? getFallbackRequestDetail(entry.id, status),
+            source: data.source ?? "",
+            submittedFrom: data.submittedFrom ?? "",
           } satisfies AdminRequest;
         });
 
@@ -84,6 +102,7 @@ export default function AdminRequestsPage() {
         request.id,
         request.clientId,
         request.clientEmail,
+        request.clientName,
         request.status,
         request.detail.title,
         request.detail.requestType,
@@ -117,8 +136,8 @@ export default function AdminRequestsPage() {
             </h1>
 
             <p className="mt-4 max-w-3xl text-sm leading-7 text-black/60">
-              Manage every client request from receipt through sourcing, invoice,
-              payment, dispatch and delivery.
+              Manage requests from submission through sourcing, missing
+              information, client approval and order conversion.
             </p>
           </div>
 
@@ -147,7 +166,7 @@ export default function AdminRequestsPage() {
             <p>Request</p>
             <p>Client</p>
             <p>Status</p>
-            <p>Type</p>
+            <p>Action needed</p>
             <p>Updated</p>
             <p className="text-right">Open</p>
           </div>
@@ -211,7 +230,7 @@ function RequestRow({ request }: { request: AdminRequest }) {
 
       <div className="min-w-0">
         <p className="truncate text-black/60">
-          {request.clientEmail || "No email"}
+          {request.clientName || request.clientEmail || "Unknown client"}
         </p>
 
         <p className="mt-1 truncate text-xs text-black/40">
@@ -231,7 +250,7 @@ function RequestRow({ request }: { request: AdminRequest }) {
       </div>
 
       <p className="truncate text-black/60">
-        {request.detail.requestType || "Not set"}
+        {getActionNeeded(request)}
       </p>
 
       <p className="truncate text-black/60">
@@ -261,6 +280,36 @@ function EmptyState({ title, body }: { title: string; body: string }) {
       </div>
     </div>
   );
+}
+
+function getActionNeeded(request: AdminRequest) {
+  if (request.adminWorkflow.orderId) return "Order created";
+
+  switch (request.status) {
+    case "submitted":
+      return "Start review";
+    case "reviewing":
+      return "Begin sourcing";
+    case "needs_info":
+      return request.adminWorkflow.missingInformation
+        ? "Waiting for client information"
+        : "Add missing-info summary";
+    case "sourcing":
+      return "Record options";
+    case "options_sent":
+      return "Move to client approval";
+    case "awaiting_client_approval":
+      return "Await client decision";
+    case "approved":
+      return request.adminWorkflow.approvedOptionId
+        ? "Convert to order"
+        : "Select approved option";
+    case "closed":
+    case "cancelled":
+      return "No action";
+    default:
+      return "Continue workflow";
+  }
 }
 
 function getFallbackRequestDetail(
