@@ -59,6 +59,8 @@ export const storage = getStorage(app);
 export const functions = getFunctions(app, "europe-west2");
 export const googleProvider = new GoogleAuthProvider();
 export const microsoftProvider = new OAuthProvider("microsoft.com");
+microsoftProvider.addScope("email");
+microsoftProvider.addScope("profile");
 
 microsoftProvider.setCustomParameters({
   prompt: "select_account",

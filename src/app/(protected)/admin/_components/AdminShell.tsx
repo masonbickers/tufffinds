@@ -1,11 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { auth, db } from "@/app/lib/firebase";
-import AdminSignInOptions from "./AdminSignInOptions";
+import { useState } from "react";
+import { useAdminSession } from "./AdminGuard";
 
 type AdminSection =
   | "dashboard"
@@ -15,12 +12,6 @@ type AdminSection =
   | "orders"
   | "email-signups"
   | "email-campaigns";
-
-type AdminUserRecord = {
-  active?: boolean;
-  email?: string;
-  role?: string;
-};
 
 type AdminMetrics = {
   clients: number;
@@ -62,117 +53,19 @@ export default function AdminShell({
   children,
   metrics,
 }: AdminShellProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [adminReady, setAdminReady] = useState(false);
-  const [adminAllowed, setAdminAllowed] = useState(false);
-  const [adminRecord, setAdminRecord] = useState<AdminUserRecord | null>(null);
-  const [adminError, setAdminError] = useState("");
+  const { signOut, signOutError, user } = useAdminSession();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser);
-      setAuthReady(true);
-    });
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
 
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (!authReady) return;
-
-    if (!user?.uid) {
-      setAdminReady(true);
-      setAdminAllowed(false);
-      setAdminRecord(null);
-      setAdminError("");
-      return;
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      setIsSigningOut(false);
     }
-
-    setAdminReady(false);
-    setAdminError("");
-
-    const unsubscribe = onSnapshot(
-      doc(db, "admin_users", user.uid),
-      (snapshot) => {
-        const data = snapshot.exists()
-          ? (snapshot.data() as AdminUserRecord)
-          : null;
-
-        setAdminRecord(data);
-        setAdminAllowed(Boolean(data?.active && data?.role === "admin"));
-        setAdminReady(true);
-      },
-      (error) => {
-        console.error("Failed to load admin_users record", error);
-        setAdminRecord(null);
-        setAdminAllowed(false);
-        setAdminError("Could not verify admin access from Firestore.");
-        setAdminReady(true);
-      },
-    );
-
-    return unsubscribe;
-  }, [authReady, user]);
-
-  if (!authReady || !adminReady) {
-    return (
-      <main className="min-h-screen bg-[#F3EEE6] px-6 py-16 text-[#241E1A]">
-        Loading admin…
-      </main>
-    );
-  }
-
-  if (!user) {
-    return (
-      <main className="min-h-screen bg-[#F3EEE6] px-6 py-12 text-[#241E1A]">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-[#D8C9B7] bg-white/80 p-10">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-black/45">
-            Admin sign in required
-          </p>
-
-          <h1 className="mt-4 font-serif text-4xl">
-            Please sign in to access admin.
-          </h1>
-
-          <AdminSignInOptions />
-
-          {adminError ? (
-            <p className="mt-4 text-sm text-[#9F3A2A]" role="alert">
-              {adminError}
-            </p>
-          ) : null}
-        </div>
-      </main>
-    );
-  }
-
-  if (!adminAllowed) {
-    return (
-      <main className="min-h-screen bg-[#F3EEE6] px-6 py-12 text-[#241E1A]">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-[#D8C9B7] bg-white/80 p-10">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-black/45">
-            Access denied
-          </p>
-
-          <h1 className="mt-4 font-serif text-4xl">
-            This account is not authorised for admin access.
-          </h1>
-
-          <div className="mt-6 rounded-xl bg-[#F7F1EA] p-4 text-sm text-black/65">
-            <p>Email: {user.email || "Unknown"}</p>
-            <p>UID: {user.uid}</p>
-            <p>Admin doc: {adminRecord ? "Found" : "Missing"}</p>
-            <p>Role: {adminRecord?.role || "—"}</p>
-            <p>Active: {adminRecord?.active ? "true" : "false"}</p>
-            {adminError ? (
-              <p className="mt-2 text-[#9F3A2A]">{adminError}</p>
-            ) : null}
-          </div>
-        </div>
-      </main>
-    );
-  }
+  };
 
   return (
     <main className="min-h-screen bg-[#efe7dc] text-[#241E1A]">
@@ -242,11 +135,18 @@ export default function AdminShell({
 
                 <button
                   type="button"
-                  onClick={() => signOut(auth)}
-                  className="w-full rounded-2xl border border-[#D6BFA8]/20 bg-[#2B231E] px-3 py-2.5 text-left text-xs font-semibold text-[#E8D5C2] transition hover:bg-[#F3EEE6] hover:text-[#221C18]"
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="w-full rounded-2xl border border-[#D6BFA8]/20 bg-[#2B231E] px-3 py-2.5 text-left text-xs font-semibold text-[#E8D5C2] transition hover:bg-[#F3EEE6] hover:text-[#221C18] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Logout
+                  {isSigningOut ? "Signing out…" : "Logout"}
                 </button>
+
+                {signOutError ? (
+                  <p className="mt-3 text-xs text-[#F2B8A8]" role="alert">
+                    {signOutError}
+                  </p>
+                ) : null}
               </div>
             </div>
           </aside>

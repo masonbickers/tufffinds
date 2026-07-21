@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth, db } from "@/app/lib/firebase";
@@ -11,83 +18,170 @@ type AdminUserRecord = {
   role?: string;
 };
 
+type AccessState = {
+  message: string;
+  status: "checking" | "allowed" | "denied" | "error";
+  uid: string | null;
+};
+
+type AdminSession = {
+  signOut: () => Promise<void>;
+  signOutError: string;
+  user: User;
+};
+
+const AdminSessionContext = createContext<AdminSession | null>(null);
+
+export function useAdminSession() {
+  const session = useContext(AdminSessionContext);
+
+  if (!session) {
+    throw new Error("useAdminSession must be used inside AdminGuard");
+  }
+
+  return session;
+}
+
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [adminReady, setAdminReady] = useState(false);
-  const [allowed, setAllowed] = useState(false);
-  const [message, setMessage] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [access, setAccess] = useState<AccessState>({
+    message: "",
+    status: "checking",
+    uid: null,
+  });
+  const [signOutError, setSignOutError] = useState("");
 
   useEffect(
     () =>
-      onAuthStateChanged(auth, (nextUser) => {
-        setUser(nextUser);
-        setAuthReady(true);
-      }),
+      onAuthStateChanged(
+        auth,
+        (nextUser) => {
+          setUser(nextUser);
+          setAuthReady(true);
+          setAuthError("");
+          setSignOutError("");
+        },
+        (error) => {
+          console.error("Failed to determine admin sign-in status", error);
+          setUser(null);
+          setAuthReady(true);
+          setAuthError(
+            "Sign-in status could not be loaded. Please refresh and try again.",
+          );
+        },
+      ),
     [],
   );
 
   useEffect(() => {
-    if (!authReady) return;
-
-    if (!user) {
-      setAllowed(false);
-      setAdminReady(true);
+    if (!authReady || !user) {
+      setAccess({ message: "", status: "checking", uid: null });
       return;
     }
 
-    setAdminReady(false);
-    setMessage("");
+    const uid = user.uid;
+    setAccess({ message: "", status: "checking", uid });
 
     return onSnapshot(
-      doc(db, "admin_users", user.uid),
+      doc(db, "admin_users", uid),
       (snapshot) => {
         const record = snapshot.exists()
           ? (snapshot.data() as AdminUserRecord)
           : null;
-        setAllowed(Boolean(record?.active && record?.role === "admin"));
-        setAdminReady(true);
+        const allowed =
+          record?.active === true && record?.role === "admin";
+
+        setAccess({
+          message: "",
+          status: allowed ? "allowed" : "denied",
+          uid,
+        });
       },
       (error) => {
         console.error("Failed to verify admin access", error);
-        setAllowed(false);
-        setMessage("Admin access could not be verified.");
-        setAdminReady(true);
+        setAccess({
+          message:
+            "Admin access could not be verified. Please try again or contact support.",
+          status: "error",
+          uid,
+        });
       },
     );
   }, [authReady, user]);
 
-  if (!authReady || !adminReady) {
+  const handleSignOut = useCallback(async () => {
+    setSignOutError("");
+
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Admin sign out failed", error);
+      setSignOutError("Sign out failed. Please try again.");
+    }
+  }, []);
+
+  const adminSession = useMemo(
+    () => (user ? { signOut: handleSignOut, signOutError, user } : null),
+    [handleSignOut, signOutError, user],
+  );
+
+  const checkingAccess =
+    user && (access.uid !== user.uid || access.status === "checking");
+
+  if (!authReady || checkingAccess) {
     return <AdminGateMessage title="Loading admin…" />;
   }
 
   if (!user) {
     return (
       <AdminGateMessage title="Admin sign in required">
+        <p className="mt-4 text-sm leading-6 text-black/60">
+          Sign in with an approved Tufffinds admin account to continue.
+        </p>
+        {authError ? (
+          <p className="mt-3 text-sm text-[#9F3A2A]" role="alert">
+            {authError}
+          </p>
+        ) : null}
         <AdminSignInOptions />
       </AdminGateMessage>
     );
   }
 
-  if (!allowed) {
+  if (access.status !== "allowed" || !adminSession) {
     return (
       <AdminGateMessage title="Access denied">
-        <p className="mt-4 text-sm text-black/60">
-          This account does not have an active admin_users record.
+        <p className="mt-4 text-sm leading-6 text-black/60">
+          This account is not authorised for the Tufffinds admin area.
         </p>
-        {message ? <p className="mt-3 text-sm text-[#9F3A2A]">{message}</p> : null}
+        {access.message ? (
+          <p className="mt-3 text-sm text-[#9F3A2A]" role="alert">
+            {access.message}
+          </p>
+        ) : null}
         <button
           type="button"
-          onClick={() => signOut(auth)}
+          onClick={handleSignOut}
           className="mt-6 rounded-full border border-[#40342F] px-6 py-3 text-sm font-semibold text-[#40342F]"
         >
           Sign out
         </button>
+        {signOutError ? (
+          <p className="mt-3 text-sm text-[#9F3A2A]" role="alert">
+            {signOutError}
+          </p>
+        ) : null}
       </AdminGateMessage>
     );
   }
 
-  return children;
+  return (
+    <AdminSessionContext.Provider value={adminSession}>
+      {children}
+    </AdminSessionContext.Provider>
+  );
 }
 
 function AdminGateMessage({

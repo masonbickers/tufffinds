@@ -2,13 +2,9 @@
 
 import { useState } from "react";
 import { signInWithPopup, type AuthProvider } from "firebase/auth";
-import {
-  auth,
-  googleProvider,
-  microsoftProvider,
-} from "@/app/lib/firebase";
+import { auth, microsoftProvider } from "@/app/lib/firebase";
 
-type SignInProvider = "microsoft" | "google";
+type SignInProvider = "microsoft";
 
 const SIGN_IN_ERRORS: Record<string, string> = {
   "auth/account-exists-with-different-credential":
@@ -23,7 +19,11 @@ const SIGN_IN_ERRORS: Record<string, string> = {
     "Your browser blocked the sign-in window. Allow pop-ups for this site and try again.",
   "auth/popup-closed-by-user": "Sign-in was cancelled.",
   "auth/unauthorized-domain":
-    "Admin sign-in is not available on this domain yet.",
+    "Admin sign-in is not available on this domain yet. Please contact the site administrator.",
+  "auth/invalid-oauth-provider":
+    "Microsoft sign-in is not configured correctly. Please contact the site administrator.",
+  "auth/invalid-credential":
+    "Microsoft sign-in could not be completed. Please try again.",
   "auth/user-disabled": "This account cannot sign in. Please contact the site administrator.",
 };
 
@@ -79,17 +79,6 @@ export default function AdminSignInOptions() {
           {signingInWith === "microsoft"
             ? "Signing in with Microsoft…"
             : "Sign in with Microsoft"}
-        </button>
-
-        <button
-          type="button"
-          disabled={signingIn}
-          onClick={() => signIn("google", googleProvider)}
-          className="w-full rounded-full border border-[#40342F] bg-transparent px-6 py-3 text-sm font-semibold text-[#40342F] transition hover:bg-[#40342F]/5 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {signingInWith === "google"
-            ? "Signing in with Google…"
-            : "Sign in with Google"}
         </button>
       </div>
 
