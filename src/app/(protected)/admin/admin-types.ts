@@ -153,8 +153,27 @@ export type MessageEntry = {
   body: string;
   id: string;
   meta?: string;
+  senderName?: string;
   timestampLabel: string;
   type: "client" | "stylist" | "system";
+};
+
+export type MessageWorkflowState =
+  | "needs_reply"
+  | "waiting_on_client"
+  | "resolved";
+
+export type MessageWorkflow = {
+  lastClientMessageId: string;
+  lastReplyAt: string;
+  lastReplyByUid: string;
+  reopenedAt: string;
+  reopenedByUid: string;
+  resolvedAt: string;
+  resolvedByUid: string;
+  state: MessageWorkflowState;
+  stateUpdatedAt: string;
+  stateUpdatedByUid: string;
 };
 
 export type ThreadDetail = {
@@ -167,11 +186,18 @@ export type ThreadDetail = {
 };
 
 export type AdminThread = {
+  adminNotes: string;
   clientId: string;
+  createdAt: string;
   detail: ThreadDetail;
   id: string;
+  isActionable: boolean;
   lastMessagePreview: string;
+  requestId: string;
+  rootRequestId: string;
   updatedAt: string;
+  workflow: MessageWorkflow;
+  workflowIsPersisted: boolean;
 };
 
 export type FirestoreTimestampValue = Timestamp | string | null | undefined;
