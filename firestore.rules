@@ -41,6 +41,19 @@ service cloud.firestore {
         && data.page.size() <= 100;
     }
 
+    function validSignupAdminStateUpdate() {
+      let state = request.resource.data.emailAdmin;
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(["emailAdmin"])
+        && state is map
+        && state.keys().hasOnly(["reason", "state", "updatedAt", "updatedByUid"])
+        && state.state in ["eligible", "suppressed", "invalid", "archived"]
+        && state.reason is string
+        && state.reason.size() >= 5
+        && state.reason.size() <= 200
+        && state.updatedAt == request.time
+        && state.updatedByUid == request.auth.uid;
+    }
+
     function validPublicRequest() {
       let data = request.resource.data;
       let detail = data.detail;
@@ -119,12 +132,16 @@ service cloud.firestore {
 
     match /waitlist/{signupId} {
       allow create: if validWaitlistSignup();
-      allow read, update, delete: if isAdmin();
+      allow read: if isAdmin();
+      allow update: if isAdmin() && validSignupAdminStateUpdate();
+      allow delete: if false;
     }
 
     match /newsletter_signups/{signupId} {
       allow create: if validNewsletterSignup();
-      allow read, update, delete: if isAdmin();
+      allow read: if isAdmin();
+      allow update: if isAdmin() && validSignupAdminStateUpdate();
+      allow delete: if false;
     }
 
     match /email_campaigns/{campaignId} {

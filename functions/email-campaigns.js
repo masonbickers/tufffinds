@@ -23,7 +23,7 @@ function normalizeEmail(value) {
   if (typeof value !== "string") return "";
 
   const email = value.trim().toLowerCase();
-  return email.length <= 320 && EMAIL_PATTERN.test(email) ? email : "";
+  return email.length <= 254 && EMAIL_PATTERN.test(email) ? email : "";
 }
 
 function hasOptOutMarker(data) {
@@ -47,6 +47,8 @@ function hasOptOutMarker(data) {
     "marketingConsent",
   ];
   const suppressedStatuses = new Set([
+    "archived",
+    "invalid",
     "unsubscribed",
     "optedout",
     "opted_out",
@@ -65,6 +67,13 @@ function hasOptOutMarker(data) {
   }
   if (explicitConsentFields.some((field) => data[field] === false)) return true;
   if (data.active === false) return true;
+
+  const adminState = String(data.emailAdmin?.state || "")
+    .trim()
+    .toLowerCase();
+  if (["archived", "invalid", "suppressed"].includes(adminState)) {
+    return true;
+  }
 
   const status = String(
     data.emailStatus || data.subscriptionStatus || data.status || ""

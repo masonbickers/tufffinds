@@ -41,10 +41,16 @@ type CampaignStatus = {
   accepted: number;
   failed: number;
   skipped: number;
+  retried: number;
   completed: boolean;
   eligibleTotal?: number;
   phase?: string;
   retryRun?: number;
+  createdAt?: string | null;
+  completedAt?: string | null;
+  initiatedBy?: string;
+  lastRetryAt?: string | null;
+  failureReasons: Array<{ code: string; count: number }>;
   updatedAt?: string | null;
 };
 
@@ -621,6 +627,10 @@ function LaunchCampaignPanel({
         statusError={statusError}
       />
 
+      {campaignStatus?.exists ? (
+        <CampaignHistory campaignStatus={campaignStatus} />
+      ) : null}
+
       <section className="rounded-[24px] border border-[#C8A99A] bg-[#FFF8F4] p-5 sm:p-6">
         <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9F3A2A]">
           Production launch campaign
@@ -753,11 +763,12 @@ function LaunchCampaignPanel({
 function AuditGrid({ counts }: { counts: AuditCounts }) {
   const items = [
     ["Eligible recipients", counts.eligibleUniqueContacts],
+    ["Suppressed contacts", counts.suppressedUniqueContacts],
     ["Newsletter records", counts.newsletterRecords],
     ["Waitlist records", counts.waitlistRecords],
     ["Duplicates removed", counts.duplicateRecords],
     ["Invalid records", counts.invalidRecords],
-    ["Opted-out records", counts.optedOutRecords],
+    ["Suppression markers", counts.optedOutRecords],
   ] as const;
 
   return (
@@ -786,16 +797,27 @@ function CampaignProgress({
   onRefresh: () => Promise<void>;
   statusError: string;
 }) {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const progress = useMemo(
     () => [
       ["Pending", campaignStatus?.pending ?? 0],
       ["Accepted", campaignStatus?.accepted ?? 0],
       ["Failed", campaignStatus?.failed ?? 0],
+      ["Retried", campaignStatus?.retried ?? 0],
       ["Skipped", campaignStatus?.skipped ?? 0],
-      ["Completed", campaignStatus?.completed ? "Yes" : "No"],
     ],
     [campaignStatus],
   );
+
+  async function refresh() {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   return (
     <section className="rounded-[24px] border border-[#DED2C5] bg-[#FCFAF6] p-5 sm:p-6">
@@ -805,15 +827,18 @@ function CampaignProgress({
             Campaign status
           </p>
           <h2 className="mt-2 font-serif text-2xl text-[#241E1A]">
-            {formatCampaignStatus(campaignStatus?.status)}
+            {!campaignStatus && !statusError
+              ? "Loading status…"
+              : formatCampaignStatus(campaignStatus?.status)}
           </h2>
         </div>
         <button
           type="button"
-          onClick={() => void onRefresh()}
+          disabled={isRefreshing}
+          onClick={() => void refresh()}
           className="rounded-xl border border-[#DED2C5] bg-white px-4 py-2 text-xs font-semibold text-[#40342F]"
         >
-          Refresh
+          {isRefreshing ? "Refreshing…" : "Refresh"}
         </button>
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -831,7 +856,58 @@ function CampaignProgress({
           {statusError}
         </p>
       ) : null}
+      {campaignStatus?.failureReasons.length ? (
+        <div className="mt-4 rounded-2xl border border-[#D8B6A7] bg-[#FFF8F4] p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9F3A2A]">
+            Safe failure summary
+          </p>
+          <ul className="mt-2 space-y-1 text-sm text-[#7A3E31]">
+            {campaignStatus.failureReasons.map((reason) => (
+              <li key={reason.code}>
+                {formatFailureReason(reason.code)}: {reason.count}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+function CampaignHistory({ campaignStatus }: { campaignStatus: CampaignStatus }) {
+  return (
+    <section className="rounded-[24px] border border-[#DED2C5] bg-white p-5 sm:p-6">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/40">
+        Campaign history
+      </p>
+      <h2 className="mt-2 font-serif text-2xl text-[#241E1A]">
+        Preserved launch record
+      </h2>
+      <div className="mt-5 grid gap-4 rounded-2xl border border-[#E7DCCF] bg-[#FBF7F2] p-4 sm:grid-cols-2 xl:grid-cols-4">
+        <HistoryItem label="Campaign" value={campaignStatus.subject || "Tufffinds website launch"} />
+        <HistoryItem label="Started" value={formatDateTime(campaignStatus.createdAt)} />
+        <HistoryItem label="Completed" value={formatDateTime(campaignStatus.completedAt)} />
+        <HistoryItem label="Initiated by" value={campaignStatus.initiatedBy || "Approved administrator"} />
+        <HistoryItem label="State" value={formatCampaignStatus(campaignStatus.status)} />
+        <HistoryItem label="Eligible at launch" value={String(campaignStatus.eligibleTotal ?? 0)} />
+        <HistoryItem label="Accepted" value={String(campaignStatus.accepted)} />
+        <HistoryItem label="Retry runs" value={String(campaignStatus.retryRun ?? 0)} />
+      </div>
+      {campaignStatus.lastRetryAt ? (
+        <p className="mt-3 text-xs text-black/45">
+          Last retry action: {formatDateTime(campaignStatus.lastRetryAt)}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+function HistoryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[9px] uppercase tracking-[0.18em] text-black/40">{label}</p>
+      <p className="mt-1 break-words text-sm font-semibold text-[#241E1A]">{value}</p>
+    </div>
   );
 }
 
@@ -888,4 +964,20 @@ function formatCampaignStatus(status?: string) {
     .split("_")
     .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(" ");
+}
+
+function formatFailureReason(code: string) {
+  return code === "provider_rejected"
+    ? "Provider did not accept delivery"
+    : "Delivery processing error";
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return "Not completed";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Unavailable";
+  return new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }

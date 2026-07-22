@@ -78,6 +78,17 @@ function requireTemplate(value) {
   return value;
 }
 
+function requirePayload(data, allowedKeys) {
+  if (
+    !data ||
+    typeof data !== "object" ||
+    Array.isArray(data) ||
+    Object.keys(data).some((key) => !allowedKeys.includes(key))
+  ) {
+    throw new HttpsError("invalid-argument", "The request is invalid.");
+  }
+}
+
 function requireResendApiKey() {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -176,7 +187,7 @@ async function claimTestSend({ db, admin, recipient, template }) {
   return auditReference;
 }
 
-function safeCampaignStatus(snapshot) {
+async function safeCampaignStatus(db, snapshot) {
   if (!snapshot?.exists) {
     return {
       exists: false,
@@ -186,11 +197,32 @@ function safeCampaignStatus(snapshot) {
       accepted: 0,
       failed: 0,
       skipped: 0,
+      retried: 0,
       completed: false,
+      failureReasons: [],
     };
   }
 
   const data = snapshot.data();
+  const deliveries = await db
+    .collection(DELIVERY_COLLECTION)
+    .where("campaignId", "==", CAMPAIGN_ID)
+    .get();
+  const failureCounts = new Map();
+  let retried = 0;
+
+  for (const document of deliveries.docs) {
+    const delivery = document.data();
+    if (Number(delivery.attempts || 0) > 1) retried += 1;
+    if (delivery.status !== "failed") continue;
+    const code = ["delivery_error", "provider_rejected"].includes(
+      delivery.failureCode
+    )
+      ? delivery.failureCode
+      : "delivery_error";
+    failureCounts.set(code, Number(failureCounts.get(code) || 0) + 1);
+  }
+
   return {
     exists: true,
     campaignId: CAMPAIGN_ID,
@@ -200,10 +232,19 @@ function safeCampaignStatus(snapshot) {
     accepted: Number(data.accepted || 0),
     failed: Number(data.failed || 0),
     skipped: Number(data.skipped || 0),
+    retried,
     completed: Boolean(data.completed),
     eligibleTotal: Number(data.eligibleTotal || 0),
     phase: data.phase || "initial",
     retryRun: Number(data.retryRun || 0),
+    createdAt: data.createdAt?.toDate?.().toISOString?.() || null,
+    completedAt: data.completedAt?.toDate?.().toISOString?.() || null,
+    initiatedBy: normalizeEmail(data.createdByEmail) || "Approved administrator",
+    lastRetryAt: data.lastRetryAt?.toDate?.().toISOString?.() || null,
+    failureReasons: [...failureCounts.entries()].map(([code, count]) => ({
+      code,
+      count,
+    })),
     updatedAt: data.updatedAt?.toDate?.().toISOString?.() || null,
   };
 }
@@ -243,6 +284,12 @@ async function enqueueBatches({ app, batches, mode, runId }) {
 }
 
 function validateStartRequest(data) {
+  requirePayload(data, [
+    "auditId",
+    "confirmationPhrase",
+    "finalConfirmation",
+    "siteUrl",
+  ]);
   if (data?.siteUrl !== EXPECTED_SITE_URL) {
     throw new HttpsError(
       "failed-precondition",
@@ -261,7 +308,10 @@ function validateStartRequest(data) {
       "Final launch confirmation is required."
     );
   }
-  if (typeof data?.auditId !== "string" || !data.auditId.trim()) {
+  if (
+    typeof data?.auditId !== "string" ||
+    !/^[A-Za-z0-9]{1,128}$/.test(data.auditId)
+  ) {
     throw new HttpsError(
       "failed-precondition",
       "Run a recipient audit before starting the campaign."
@@ -273,6 +323,7 @@ exports.previewAdminEmailTemplate = onCall(
   { region: REGION },
   async (request) => {
     await requireApprovedAdmin(request);
+    requirePayload(request.data, ["template"]);
     const template = requireTemplate(request.data?.template);
     return buildEmailTemplate(template);
   }
@@ -280,6 +331,7 @@ exports.previewAdminEmailTemplate = onCall(
 
 exports.sendAdminTestEmail = onCall({ region: REGION }, async (request) => {
   const admin = await requireApprovedAdmin(request);
+  requirePayload(request.data, ["recipient", "template"]);
   const template = requireTemplate(request.data?.template);
   const recipient = await resolveApprovedTestRecipient({
     db: admin.db,
@@ -356,6 +408,7 @@ exports.auditLaunchEmailRecipients = onCall(
   { region: REGION, timeoutSeconds: 300 },
   async (request) => {
     const admin = await requireApprovedAdmin(request);
+    requirePayload(request.data, []);
     let audit;
 
     try {
@@ -453,6 +506,7 @@ exports.startLaunchEmailCampaign = onCall(
         completed: false,
         completedBatches: 0,
         createdAt: FieldValue.serverTimestamp(),
+        createdByEmail: admin.email || null,
         createdByUid: admin.uid,
         eligibleTotal: currentAudit.eligibleRecipients.length,
         failed: 0,
@@ -497,11 +551,12 @@ exports.getLaunchEmailCampaignStatus = onCall(
   { region: REGION },
   async (request) => {
     const admin = await requireApprovedAdmin(request);
+    requirePayload(request.data, []);
     const snapshot = await admin.db
       .collection(CAMPAIGN_COLLECTION)
       .doc(CAMPAIGN_ID)
       .get();
-    return safeCampaignStatus(snapshot);
+    return safeCampaignStatus(admin.db, snapshot);
   }
 );
 
@@ -523,6 +578,7 @@ exports.retryFailedLaunchEmailCampaign = onCall(
   { region: REGION, timeoutSeconds: 300 },
   async (request) => {
     const admin = await requireApprovedAdmin(request);
+    requirePayload(request.data, ["confirmationPhrase", "finalConfirmation"]);
     if (
       request.data?.confirmationPhrase !== RETRY_CONFIRMATION_PHRASE ||
       request.data?.finalConfirmation !== true
@@ -573,30 +629,16 @@ exports.retryFailedLaunchEmailCampaign = onCall(
       else suppressedReferences.push(document.ref);
     }
 
-    await markSuppressedFailedDeliveries(admin.db, suppressedReferences);
-
-    if (retryRecipients.length === 0) {
-      await campaignReference.update({
-        completed: true,
-        failed: 0,
-        pending: 0,
-        skipped: FieldValue.increment(suppressedReferences.length),
-        status: "completed",
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      return { started: false, noEligibleFailures: true };
-    }
-
     const retryRun = Number(campaign.retryRun || 0) + 1;
     const runId = `retry-${retryRun}`;
-    const batches = splitIntoBatches(retryRecipients);
 
     await admin.db.runTransaction(async (transaction) => {
       const freshSnapshot = await transaction.get(campaignReference);
       const fresh = freshSnapshot.data();
       if (
         !fresh ||
-        !["completed", "completed_with_failures"].includes(fresh.status)
+        !["completed", "completed_with_failures"].includes(fresh.status) ||
+        Number(fresh.retryRun || 0) !== retryRun - 1
       ) {
         throw new HttpsError(
           "failed-precondition",
@@ -606,17 +648,54 @@ exports.retryFailedLaunchEmailCampaign = onCall(
 
       transaction.update(campaignReference, {
         completed: false,
-        completedBatches: 0,
-        failed: retryRecipients.length,
-        pending: retryRecipients.length,
+        completedAt: null,
         phase: "retry",
         retryRun,
         runId,
-        skipped: FieldValue.increment(suppressedReferences.length),
-        status: "queueing_retry",
-        totalBatches: batches.length,
+        status: "preparing_retry",
         updatedAt: FieldValue.serverTimestamp(),
       });
+    });
+
+    try {
+      await markSuppressedFailedDeliveries(admin.db, suppressedReferences);
+    } catch {
+      await campaignReference.update({
+        status: "queue_error",
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      throw new HttpsError(
+        "internal",
+        "Suppressed failed recipients could not be safely prepared for retry."
+      );
+    }
+
+    if (retryRecipients.length === 0) {
+      await campaignReference.update({
+        completed: true,
+        completedAt: FieldValue.serverTimestamp(),
+        failed: 0,
+        lastRetryAt: FieldValue.serverTimestamp(),
+        lastRetryByEmail: admin.email || null,
+        pending: 0,
+        skipped: FieldValue.increment(suppressedReferences.length),
+        status: "completed",
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      return { started: false, noEligibleFailures: true };
+    }
+
+    const batches = splitIntoBatches(retryRecipients);
+    await campaignReference.update({
+      completedBatches: 0,
+      failed: retryRecipients.length,
+      lastRetryAt: FieldValue.serverTimestamp(),
+      lastRetryByEmail: admin.email || null,
+      pending: retryRecipients.length,
+      skipped: FieldValue.increment(suppressedReferences.length),
+      status: "queueing_retry",
+      totalBatches: batches.length,
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     try {
@@ -717,9 +796,13 @@ async function deliverCampaignRecipient({ db, email, mode, recipient, resend, ru
       updatedAt: FieldValue.serverTimestamp(),
     });
     return "accepted";
-  } catch {
+  } catch (error) {
+    const failureCode = error?.message === "Campaign email was not accepted."
+      ? "provider_rejected"
+      : "delivery_error";
     await claim.reference.update({
       failedAt: FieldValue.serverTimestamp(),
+      failureCode,
       status: "failed",
       updatedAt: FieldValue.serverTimestamp(),
     });
@@ -820,15 +903,32 @@ exports.processLaunchEmailCampaignBatch = onTaskDispatched(
 
     const { batchIndex, campaignId, mode, recipients, runId } = request.data || {};
     if (
+      !request.data ||
+      typeof request.data !== "object" ||
+      Array.isArray(request.data) ||
+      Object.keys(request.data).some(
+        (key) =>
+          !["batchIndex", "campaignId", "mode", "recipients", "runId"].includes(
+            key
+          )
+      ) ||
       campaignId !== CAMPAIGN_ID ||
       !["initial", "retry"].includes(mode) ||
       typeof runId !== "string" ||
+      !/^(initial|retry-[1-9][0-9]*)$/.test(runId) ||
       !Number.isInteger(batchIndex) ||
+      batchIndex < 0 ||
       !Array.isArray(recipients) ||
       recipients.length < 1 ||
       recipients.length > CAMPAIGN_BATCH_SIZE ||
       recipients.some(
         (recipient) =>
+          !recipient ||
+          typeof recipient !== "object" ||
+          Array.isArray(recipient) ||
+          Object.keys(recipient).some(
+            (key) => !["email", "hash"].includes(key)
+          ) ||
           normalizeEmail(recipient?.email) !== recipient?.email ||
           recipientHash(recipient.email) !== recipient?.hash
       )
