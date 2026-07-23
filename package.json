@@ -6,9 +6,12 @@
     "node": "20.x"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build --turbopack",
     "start": "next start",
+    "sample-data:up": "docker compose up --build -d",
+    "sample-data:down": "docker compose down",
+    "sample-data:logs": "docker compose logs -f firebase-emulator",
     "email:launch": "node functions/scripts/launch-email-campaign.js --dry-run",
     "email:launch:retry-failed": "node functions/scripts/launch-email-campaign.js --retry-failed",
     "email:launch:send": "node functions/scripts/launch-email-campaign.js --send",
@@ -21,6 +24,7 @@
   },
   "dependencies": {
     "firebase": "^12.4.0",
+    "jspdf": "^3.0.4",
     "next": "15.5.9",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"

@@ -16,6 +16,34 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Local sample data with Docker
+
+Start the disposable Firebase Auth and Firestore emulators:
+
+```bash
+npm run sample-data:up
+```
+
+Copy `.env.example` to `.env.local` and use this local-only Firebase configuration:
+
+```dotenv
+NEXT_PUBLIC_FIREBASE_API_KEY=demo-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=demo-tufffinds.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-tufffinds
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=demo-tufffinds.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=000000000000
+NEXT_PUBLIC_FIREBASE_APP_ID=1:000000000000:web:0000000000000000000000
+NEXT_PUBLIC_USE_FIREBASE_EMULATORS=true
+```
+
+Then run `npm run dev`, open `/admin`, and choose **Use sample admin**. The emulator
+dashboard is available at [http://localhost:4000](http://localhost:4000). Data is
+disposable and is reseeded whenever the container is recreated. Stop it with:
+
+```bash
+npm run sample-data:down
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

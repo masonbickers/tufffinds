@@ -1,0 +1,176 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admin_users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.active == true
+        && get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    function validEmail(email) {
+      return email is string
+        && email.size() >= 5
+        && email.size() <= 254
+        && email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$');
+    }
+
+    function validWaitlistSignup() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(["email", "createdAt", "source", "ua"])
+        && validEmail(data.email)
+        && data.createdAt == request.time
+        && data.source == "web:coming-soon"
+        && data.ua is string
+        && data.ua.size() <= 500;
+    }
+
+    function validNewsletterSignup() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(["email", "createdAt", "source", "page"])
+        && validEmail(data.email)
+        && data.createdAt == request.time
+        && data.source == "web:newsletter"
+        && data.page is string
+        && data.page.matches('^/(faq|privacy|terms|cookie-policy|data-security)?$')
+        && data.page.size() <= 100;
+    }
+
+    function validPublicRequest() {
+      let data = request.resource.data;
+      let detail = data.detail;
+      return data.keys().hasOnly([
+          "clientEmail",
+          "clientId",
+          "clientName",
+          "clientPhone",
+          "createdAt",
+          "detail",
+          "source",
+          "status",
+          "submittedFrom",
+          "updatedAt"
+        ])
+        && validEmail(data.clientEmail)
+        && data.clientId == ""
+        && data.clientName is string
+        && data.clientName.size() >= 1
+        && data.clientName.size() <= 120
+        && data.clientPhone is string
+        && data.clientPhone.size() >= 3
+        && data.clientPhone.size() <= 40
+        && data.createdAt == request.time
+        && data.updatedAt == request.time
+        && data.source == "version-1-contact-form"
+        && data.status == "submitted"
+        && data.submittedFrom == "/"
+        && detail is map
+        && detail.keys().hasOnly([
+          "activitySummary",
+          "categories",
+          "createdDateLabel",
+          "dislikedBrands",
+          "favoriteBrands",
+          "href",
+          "id",
+          "linkedEdits",
+          "linkedMessagesPreview",
+          "notes",
+          "purchaseMode",
+          "references",
+          "requestType",
+          "shippingCountry",
+          "status",
+          "statusTimeline",
+          "styleNotes",
+          "title",
+          "urgency",
+          "whatHappensNext"
+        ])
+        && detail.activitySummary is list
+        && detail.categories is list
+        && detail.dislikedBrands is list
+        && detail.favoriteBrands is list
+        && detail.linkedEdits is list
+        && detail.linkedMessagesPreview is list
+        && detail.references is list
+        && detail.statusTimeline is list
+        && detail.notes is string
+        && detail.notes.size() >= 1
+        && detail.notes.size() <= 5000
+        && detail.title is string
+        && detail.title.size() >= 1
+        && detail.title.size() <= 250
+        && detail.purchaseMode == "Sourcing request"
+        && detail.requestType == "Website enquiry"
+        && detail.status == "submitted";
+    }
+
+    match /admin_users/{userId} {
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /waitlist/{signupId} {
+      allow create: if validWaitlistSignup();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /newsletter_signups/{signupId} {
+      allow create: if validNewsletterSignup();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /email_campaigns/{campaignId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /email_campaign_deliveries/{deliveryId} {
+      allow read, write: if false;
+    }
+
+    match /email_campaign_audits/{auditId} {
+      allow read, write: if false;
+    }
+
+    match /email_campaign_batches/{batchId} {
+      allow read, write: if false;
+    }
+
+    match /admin_email_test_audit/{auditId} {
+      allow read, write: if false;
+    }
+
+    match /admin_email_test_limits/{adminId} {
+      allow read, write: if false;
+    }
+
+    match /requests/{requestId} {
+      allow create: if validPublicRequest() || isAdmin();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /client_profiles/{clientId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /message_threads/{threadId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

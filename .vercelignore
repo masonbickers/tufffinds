@@ -1,0 +1,12 @@
+# Local design/source archives are not used by the Next.js runtime.
+brand-assets/
+*.psd
+TF-hats-*.png
+cant-find*.png
+
+# Local development-only resources.
+.email-previews/
+docker/
+docker-compose.yml
+tmp/
+functions/node_modules/

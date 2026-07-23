@@ -41,22 +41,39 @@ export type AdminClient = {
   updatedAt: string;
 };
 
-export type RequestStatus =
-  | "submitted"
-  | "reviewing"
-  | "needs_info"
-  | "sourcing"
-  | "options_sent"
-  | "awaiting_client_approval"
-  | "approved"
-  | "invoice_sent"
-  | "paid"
-  | "purchased"
-  | "quality_check"
-  | "dispatched"
-  | "delivered"
-  | "closed"
-  | "cancelled";
+export const REQUEST_STATUSES = [
+  "submitted",
+  "reviewing",
+  "needs_info",
+  "sourcing",
+  "options_sent",
+  "awaiting_client_approval",
+  "approved",
+  "invoice_sent",
+  "paid",
+  "purchased",
+  "quality_check",
+  "dispatched",
+  "delivered",
+  "closed",
+  "cancelled",
+] as const;
+
+export type RequestStatus = (typeof REQUEST_STATUSES)[number];
+
+export const ORDER_STATUSES = [
+  "created",
+  "invoice_sent",
+  "paid",
+  "purchased",
+  "quality_check",
+  "dispatched",
+  "delivered",
+  "closed",
+  "cancelled",
+] as const;
+
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export type RequestReference = {
   id: string;
@@ -174,4 +191,16 @@ export type AdminThread = {
   updatedAt: string;
 };
 
-export type FirestoreTimestampValue = Timestamp | string | null | undefined;
+export type FirestoreTimestampValue =
+  | Timestamp
+  | Date
+  | string
+  | number
+  | {
+      seconds?: number;
+      nanoseconds?: number;
+      _seconds?: number;
+      _nanoseconds?: number;
+    }
+  | null
+  | undefined;

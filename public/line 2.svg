@@ -1,0 +1,18 @@
+<!-- public/sectionbreak.svg -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1200 24"
+     preserveAspectRatio="none">
+  <!-- Thin, smooth wave that stretches to any width -->
+  <path d="M0 12
+           C 120 4, 180 20, 300 12
+           S 480 4, 600 12
+           780 20, 900 12
+           1080 4, 1200 12"
+        fill="none"
+        stroke="#1a1b1d"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity=".9" />
+</svg>
+

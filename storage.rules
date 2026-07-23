@@ -2,6 +2,24 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/admin_users/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/admin_users/$(request.auth.uid)).data.active == true
+        && firestore.get(/databases/(default)/documents/admin_users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    function validRequestImage() {
+      return request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|heic|heif)');
+    }
+
+    match /request-references/{requestId}/{fileName} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin() && validRequestImage();
+      allow delete: if isAdmin();
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

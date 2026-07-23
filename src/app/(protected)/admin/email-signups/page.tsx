@@ -12,6 +12,17 @@ import {
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
+import {
+  AdminFilterSelect,
+  AdminMetric,
+  AdminPage,
+  AdminPageHeader,
+  AdminSearchInput,
+  AdminState,
+  AdminStatusBadge,
+  AdminTable,
+  AdminToolbar,
+} from "../_components/AdminUI";
 
 const SIGNUPS_PER_TYPE = 200;
 
@@ -139,65 +150,18 @@ export default function EmailSignupsPage() {
 
   return (
     <AdminShell active="email-signups">
-      <div className="space-y-6">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.3em] text-black/40">
-              Audience
-            </p>
+      <AdminPage>
+        <AdminPageHeader eyebrow="Audience" title="Email signups" description="Newsletter and waitlist submissions, newest first." actions={<div className="border-l border-[#ded5cb] pl-4"><AdminMetric label="Total signups" value={isLoading ? "—" : totalCount} /></div>} />
 
-            <h1 className="mt-3 font-serif text-4xl text-[#241E1A]">
-              Email signups
-            </h1>
-
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-black/60">
-              Newsletter and waitlist email addresses submitted through the
-              public website, newest first.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] px-6 py-4">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-black/40">
-              Total signups
-            </p>
-
-            <p className="mt-2 text-3xl font-semibold text-[#241E1A]">
-              {isLoading ? "—" : totalCount}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-3 rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] p-4 sm:grid-cols-[minmax(0,1fr)_220px]">
-          <label className="space-y-2">
-            <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-black/40">
-              Search email
-            </span>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by email address"
-              className="w-full rounded-xl border border-[#DED2C5] bg-white px-4 py-3 text-sm text-[#241E1A] outline-none placeholder:text-black/35 focus:border-[#B59674]"
-            />
-          </label>
-
-          <label className="space-y-2">
-            <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-black/40">
-              Signup type
-            </span>
-            <select
-              value={typeFilter}
-              onChange={(event) =>
-                setTypeFilter(event.target.value as "all" | SignupType)
-              }
-              className="w-full rounded-xl border border-[#DED2C5] bg-white px-4 py-3 text-sm text-[#241E1A] outline-none focus:border-[#B59674]"
-            >
+        <AdminTable label="Email signups">
+          <AdminToolbar>
+            <AdminSearchInput value={search} onChange={setSearch} placeholder="Search by email address" label="Search signups" />
+            <AdminFilterSelect label="Signup type" value={typeFilter} onChange={(value) => setTypeFilter(value as "all" | SignupType)}>
               <option value="all">All signups</option>
               <option value="newsletter">Newsletter</option>
               <option value="waitlist">Waitlist</option>
-            </select>
-          </label>
-        </div>
+            </AdminFilterSelect>
+          </AdminToolbar>
 
         {!isLoading && !error ? (
           <p className="text-xs text-black/45">
@@ -206,7 +170,7 @@ export default function EmailSignupsPage() {
           </p>
         ) : null}
 
-        <section className="overflow-hidden rounded-2xl border border-[#DED2C5] bg-white">
+        <div>
           <div className="hidden grid-cols-[minmax(0,1.45fr)_0.8fr_minmax(0,1.25fr)_1fr] gap-4 border-b border-[#E9DED3] bg-[#FBF7F2] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-black/40 md:grid">
             <p>Email</p>
             <p>Type</p>
@@ -215,18 +179,18 @@ export default function EmailSignupsPage() {
           </div>
 
           {isLoading ? (
-            <SignupState
+            <AdminState
               title="Loading email signups"
               body="Reading the newest newsletter and waitlist records."
             />
           ) : null}
 
           {!isLoading && error ? (
-            <SignupState title="Could not load email signups" body={error} />
+            <AdminState title="Could not load email signups" body={error} tone="error" />
           ) : null}
 
           {!isLoading && !error && filteredSignups.length === 0 ? (
-            <SignupState
+            <AdminState
               title={signups.length === 0 ? "No email signups yet" : "No signups found"}
               body={
                 signups.length === 0
@@ -252,9 +216,9 @@ export default function EmailSignupsPage() {
 
                   <div>
                     <MobileLabel>Type</MobileLabel>
-                    <span className="inline-flex rounded-full border border-[#DED2C5] bg-[#FBF7F2] px-3 py-1 text-xs font-medium text-[#5B493D]">
+                    <AdminStatusBadge tone={signup.type === "newsletter" ? "info" : "neutral"}>
                       {signup.typeLabel}
-                    </span>
+                    </AdminStatusBadge>
                   </div>
 
                   <div className="min-w-0 text-black/60">
@@ -270,13 +234,14 @@ export default function EmailSignupsPage() {
               ))}
             </div>
           ) : null}
-        </section>
+        </div>
+        </AdminTable>
 
         <p className="text-xs leading-5 text-black/40">
           This page loads at most the newest {SIGNUPS_PER_TYPE} records from
           each signup type. Older records remain in Firestore.
         </p>
-      </div>
+      </AdminPage>
     </AdminShell>
   );
 }
@@ -315,16 +280,5 @@ function MobileLabel({ children }: { children: React.ReactNode }) {
     <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-black/35 md:hidden">
       {children}
     </p>
-  );
-}
-
-function SignupState({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="px-6 py-16 text-center">
-      <h2 className="font-serif text-2xl text-[#241E1A]">{title}</h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-black/55">
-        {body}
-      </p>
-    </div>
   );
 }

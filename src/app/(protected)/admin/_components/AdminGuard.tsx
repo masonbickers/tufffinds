@@ -1,15 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth, db } from "@/app/lib/firebase";
 import AdminSignInOptions from "./AdminSignInOptions";
+import styles from "../admin.module.css";
 
 type AdminUserRecord = {
   active?: boolean;
   role?: string;
 };
+
+type AdminSession = {
+  signOut: () => Promise<void>;
+  signOutError: string;
+  user: User;
+};
+
+const AdminSessionContext = createContext<AdminSession | null>(null);
+
+export function useAdminSession() {
+  const session = useContext(AdminSessionContext);
+
+  if (!session) {
+    throw new Error("useAdminSession must be used inside AdminGuard");
+  }
+
+  return session;
+}
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -17,12 +44,14 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   const [adminReady, setAdminReady] = useState(false);
   const [allowed, setAllowed] = useState(false);
   const [message, setMessage] = useState("");
+  const [signOutError, setSignOutError] = useState("");
 
   useEffect(
     () =>
       onAuthStateChanged(auth, (nextUser) => {
         setUser(nextUser);
         setAuthReady(true);
+        setSignOutError("");
       }),
     [],
   );
@@ -33,10 +62,12 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     if (!user) {
       setAllowed(false);
       setAdminReady(true);
+      setMessage("");
       return;
     }
 
     setAdminReady(false);
+    setAllowed(false);
     setMessage("");
 
     return onSnapshot(
@@ -45,17 +76,35 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
         const record = snapshot.exists()
           ? (snapshot.data() as AdminUserRecord)
           : null;
-        setAllowed(Boolean(record?.active && record?.role === "admin"));
+        setAllowed(Boolean(record?.active === true && record?.role === "admin"));
         setAdminReady(true);
       },
       (error) => {
         console.error("Failed to verify admin access", error);
         setAllowed(false);
-        setMessage("Admin access could not be verified.");
+        setMessage(
+          "Admin access could not be verified. Please try again or contact support.",
+        );
         setAdminReady(true);
       },
     );
   }, [authReady, user]);
+
+  const handleSignOut = useCallback(async () => {
+    setSignOutError("");
+
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Admin sign out failed", error);
+      setSignOutError("Sign out failed. Please try again.");
+    }
+  }, []);
+
+  const adminSession = useMemo(
+    () => (user ? { signOut: handleSignOut, signOutError, user } : null),
+    [handleSignOut, signOutError, user],
+  );
 
   if (!authReady || !adminReady) {
     return <AdminGateMessage title="Loading admin…" />;
@@ -63,48 +112,95 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   if (!user) {
     return (
-      <AdminGateMessage title="Admin sign in required">
+      <AdminGateMessage
+        title="Admin sign in"
+        eyebrow="Private workspace"
+        description="Continue with an authorised Tufffinds work account."
+      >
         <AdminSignInOptions />
       </AdminGateMessage>
     );
   }
 
-  if (!allowed) {
+  if (!allowed || !adminSession) {
     return (
-      <AdminGateMessage title="Access denied">
-        <p className="mt-4 text-sm text-black/60">
+      <AdminGateMessage
+        title="Access denied"
+        eyebrow="Private workspace"
+        description="This account is not authorised to use the admin workspace."
+      >
+        <p className={styles.helperText}>
           This account does not have an active admin_users record.
         </p>
-        {message ? <p className="mt-3 text-sm text-[#9F3A2A]">{message}</p> : null}
+        {message ? (
+          <p className={styles.errorText} role="alert">
+            {message}
+          </p>
+        ) : null}
         <button
           type="button"
-          onClick={() => signOut(auth)}
-          className="mt-6 rounded-full border border-[#40342F] px-6 py-3 text-sm font-semibold text-[#40342F]"
+          onClick={handleSignOut}
+          className={styles.secondaryButton}
         >
           Sign out
         </button>
+        {signOutError ? (
+          <p className={styles.errorText} role="alert">
+            {signOutError}
+          </p>
+        ) : null}
       </AdminGateMessage>
     );
   }
 
-  return children;
+  return (
+    <AdminSessionContext.Provider value={adminSession}>
+      {children}
+    </AdminSessionContext.Provider>
+  );
 }
 
 function AdminGateMessage({
   children,
+  description,
+  eyebrow = "Tufffinds admin",
   title,
 }: {
   children?: React.ReactNode;
+  description?: string;
+  eyebrow?: string;
   title: string;
 }) {
   return (
-    <main className="min-h-screen bg-[#F3EEE6] px-6 py-12 text-[#241E1A]">
-      <div className="mx-auto max-w-2xl rounded-2xl border border-[#D8C9B7] bg-white/80 p-10">
-        <p className="text-[11px] uppercase tracking-[0.3em] text-black/45">
-          Tufffinds admin
+    <main className={styles.loginShell}>
+      <div className={styles.loginWrap}>
+        <div className={styles.logoWrap}>
+          <Image
+            src="/finallogobrown.png"
+            alt="Tufffinds"
+            fill
+            sizes="(max-width: 640px) 78vw, 460px"
+            priority
+            unoptimized
+            className={styles.logo}
+          />
+        </div>
+
+        <section className={styles.loginPanel}>
+          <div className={styles.loginCopy}>
+            <p className={styles.eyebrow}>{eyebrow}</p>
+            <h1 className={styles.title}>{title}</h1>
+            {description ? (
+              <p className={styles.description}>{description}</p>
+            ) : null}
+          </div>
+
+          {children}
+        </section>
+
+        <p className={styles.loginFooter}>
+          © {new Date().getFullYear()} Tufffinds · Authorised team access only
         </p>
-        <h1 className="mt-4 font-serif text-4xl">{title}</h1>
-        {children}
       </div>
     </main>
   );

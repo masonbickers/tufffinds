@@ -1,0 +1,36 @@
+.printRoot {
+  min-width: 0;
+}
+
+.sheet {
+  margin: 0 auto;
+  max-width: 52rem;
+  border: 1px solid #ded5cb;
+  border-radius: 12px;
+  background: #fff;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  color: #2b231e;
+  box-shadow: 0 12px 35px rgb(43 35 30 / 8%);
+}
+
+@media print {
+  .builderOnly {
+    display: none !important;
+  }
+
+  .printRoot {
+    position: absolute;
+    inset: 0;
+    z-index: 9999;
+    width: 100%;
+    background: #fff;
+  }
+
+  .sheet {
+    max-width: none;
+    border: 0;
+    border-radius: 0;
+    padding: 12mm;
+    box-shadow: none;
+  }
+}

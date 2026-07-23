@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const BLOCKED_ROUTES = [
-  /^\/admin\/orders\/[^/]+\/?$/,
   /^\/coming-soon(\/|$)/,
   /^\/duty-calculator(\/|$)/,
   /^\/single-site(\/|$)/,

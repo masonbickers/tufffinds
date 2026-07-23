@@ -1,0 +1,629 @@
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.periodSelect {
+  position: relative;
+}
+
+.periodSelect select,
+.exportButton,
+.settingsButton,
+.createInvoiceButton {
+  height: 2.25rem;
+  border-radius: 0.5625rem;
+  padding: 0 0.875rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.createInvoiceButton {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #2b231e;
+  background: #2b231e;
+  color: #fff;
+}
+
+.createInvoiceButton:hover {
+  background: #46382f;
+}
+
+.settingsButton {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d3c8bd;
+  background: #fff;
+  color: #4f4239;
+}
+
+.settingsButton:hover {
+  background: #f8f4ef;
+}
+
+.periodSelect select {
+  min-width: 8.75rem;
+  border: 1px solid #d3c8bd;
+  background: #fff;
+  color: #4f4239;
+}
+
+.exportButton {
+  border: 1px solid #2b231e;
+  background: #2b231e;
+  color: #fff;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.exportButton:hover {
+  background: #46382f;
+}
+
+.exportButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.errorBanner {
+  border: 1px solid #e6c7be;
+  border-radius: 0.625rem;
+  background: #fcf0ed;
+  padding: 0.75rem 0.875rem;
+  color: #8c3c2d;
+  font-size: 0.8125rem;
+}
+
+.setupBanner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 1px solid #d9c5b4;
+  border-radius: 0.75rem;
+  background: #f7eee6;
+  padding: 0.875rem 1rem;
+}
+
+.setupBanner div {
+  display: grid;
+  gap: 0.1875rem;
+}
+
+.setupBanner strong {
+  color: #46372e;
+  font-size: 0.75rem;
+}
+
+.setupBanner span {
+  color: #79675b;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.setupBanner > a {
+  flex: 0 0 auto;
+  color: #604b3e;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.heroGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.salesCard,
+.vatCard,
+.panel {
+  border: 1px solid #ded5cb;
+  border-radius: 0.875rem;
+  background: #fff;
+}
+
+.salesCard,
+.vatCard {
+  min-height: 15rem;
+  padding: 1.125rem;
+}
+
+.salesCard {
+  color: #f8f4ef;
+  background:
+    radial-gradient(circle at 85% 10%, rgb(255 255 255 / 10%), transparent 30%),
+    #2c241f;
+  border-color: #2c241f;
+}
+
+.cardTopline,
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cardEyebrow,
+.sectionEyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.cardEyebrow {
+  color: #83736a;
+}
+
+.salesCard .cardEyebrow {
+  color: #c8bbb1;
+}
+
+.liveMarker,
+.periodPill,
+.healthScore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.liveMarker {
+  color: #d8cec5;
+}
+
+.liveMarker span {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: #7da884;
+  box-shadow: 0 0 0 3px rgb(125 168 132 / 12%);
+}
+
+.periodPill {
+  background: #f1ece6;
+  padding: 0.3125rem 0.5625rem;
+  color: #725f52;
+}
+
+.heroValue,
+.vatValue {
+  margin-top: 2rem;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.heroValue {
+  color: #fff;
+}
+
+.vatValue {
+  color: #2b231e;
+}
+
+.salesMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1.25rem;
+  color: #b9aca2;
+  font-size: 0.75rem;
+}
+
+.salesMeta span {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.marginTrack {
+  height: 0.25rem;
+  overflow: hidden;
+  margin-top: 1.25rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+}
+
+.marginTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #d8c2ad;
+}
+
+.marginCaption {
+  margin-top: 0.5rem;
+  color: #a99c92;
+  font-size: 0.6875rem;
+}
+
+.vatBreakdown {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.vatBreakdown div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #ece5de;
+  padding-bottom: 0.5rem;
+}
+
+.vatBreakdown dt,
+.vatBreakdown dd {
+  font-size: 0.75rem;
+}
+
+.vatBreakdown dt {
+  color: #766960;
+}
+
+.vatBreakdown dd {
+  color: #3b302a;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.assumption {
+  margin-top: 0.875rem;
+  color: #968980;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.metricStrip {
+  display: grid;
+  border-block: 1px solid #dfd6cd;
+}
+
+.metric {
+  padding: 0.875rem 0.25rem;
+}
+
+.metric + .metric {
+  border-top: 1px solid #e5ddd5;
+}
+
+.metric > p {
+  color: #81736a;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 0.375rem;
+  color: #2b231e;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.metric .metric_positive {
+  color: #35633c;
+}
+
+.metric .metric_warning {
+  color: #8b5e28;
+}
+
+.metric > span {
+  display: block;
+  margin-top: 0.25rem;
+  color: #8a7d74;
+  font-size: 0.6875rem;
+}
+
+.lowerGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.panel {
+  overflow: hidden;
+}
+
+.panelHeader {
+  padding: 1rem 1.125rem;
+}
+
+.sectionEyebrow {
+  margin-bottom: 0.25rem;
+  color: #8a7567;
+}
+
+.panelHeader h2 {
+  color: #302722;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.textLink {
+  flex: 0 0 auto;
+  color: #725f52;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.textLink:hover {
+  color: #2b231e;
+}
+
+.invoiceList {
+  border-top: 1px solid #ebe3dc;
+}
+
+.invoiceRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  transition: background 150ms ease;
+}
+
+.invoiceRow + .invoiceRow {
+  border-top: 1px solid #eee7e0;
+}
+
+.invoiceRow:hover {
+  background: #faf7f3;
+}
+
+.invoiceIdentity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.invoiceIdentity div {
+  min-width: 0;
+}
+
+.invoiceIcon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #e1d7cd;
+  border-radius: 0.5rem;
+  background: #f5f0ea;
+  color: #806b5d;
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.invoiceIdentity p,
+.invoiceAmount {
+  color: #3c312a;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.invoiceIdentity p,
+.invoiceIdentity span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invoiceIdentity div > span,
+.invoiceDate {
+  color: #8a7d74;
+  font-size: 0.6875rem;
+}
+
+.invoiceDate,
+.invoiceStatus {
+  display: none;
+}
+
+.invoiceAmount {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.emptyState {
+  border-top: 1px solid #ebe3dc;
+  padding: 2.5rem 1rem;
+  color: #867970;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.sideColumn {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.calendarMark {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.5rem;
+  background: #efe5db;
+  color: #715847;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1rem;
+}
+
+.deadlineDate {
+  padding: 0.125rem 1.125rem 0;
+  color: #302722;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.375rem;
+}
+
+.deadlineCopy {
+  padding: 0.5rem 1.125rem 0;
+  color: #83766d;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.deadlineProgress {
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.deadlineProgress > span {
+  display: block;
+  height: 0.3125rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eee7e0;
+}
+
+.deadlineProgress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #92735e;
+}
+
+.deadlineProgress p {
+  margin-top: 0.5rem;
+  color: #8a7d74;
+  font-size: 0.6875rem;
+}
+
+.deadlineProgress b {
+  color: #4a3d35;
+}
+
+.healthScore {
+  background: #edf5ee;
+  padding: 0.3125rem 0.5625rem;
+  color: #35633c;
+}
+
+.healthScoreWarning {
+  background: #fbf3e5;
+  color: #7a5b23;
+}
+
+.checkList {
+  display: grid;
+  gap: 0.75rem;
+  border-top: 1px solid #ebe3dc;
+  padding: 1rem 1.125rem 1.125rem;
+  list-style: none;
+}
+
+.checkList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.checkList li > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  margin-top: 0.1875rem;
+  border-radius: 50%;
+  background: #6e9a74;
+}
+
+.checkList li > .checkWarning {
+  background: #c28a45;
+}
+
+.checkList p {
+  color: #75685f;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.checkList b {
+  color: #3e332d;
+}
+
+@media (min-width: 640px) {
+  .setupBanner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .heroGrid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  }
+
+  .salesCard,
+  .vatCard {
+    padding: 1.375rem;
+  }
+
+  .metricStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric {
+    padding: 1rem;
+  }
+
+  .metric + .metric {
+    border-top: 0;
+  }
+
+  .metric:nth-child(even) {
+    border-left: 1px solid #e5ddd5;
+  }
+
+  .metric:nth-child(n + 3) {
+    border-top: 1px solid #e5ddd5;
+  }
+
+  .invoiceRow {
+    grid-template-columns: minmax(12rem, 1fr) 7rem 8rem 6.5rem;
+  }
+
+  .invoiceDate,
+  .invoiceStatus {
+    display: block;
+  }
+}
+
+@media (min-width: 1100px) {
+  .metricStrip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .metric + .metric {
+    border-left: 1px solid #e5ddd5;
+  }
+
+  .metric:nth-child(n + 3) {
+    border-top: 0;
+  }
+
+  .lowerGrid {
+    grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.7fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exportButton,
+  .invoiceRow {
+    transition: none;
+  }
+}

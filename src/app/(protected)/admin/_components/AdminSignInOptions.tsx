@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { signInWithPopup, type AuthProvider } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  type AuthProvider,
+} from "firebase/auth";
 import {
   auth,
   googleProvider,
+  isFirebaseEmulatorEnabled,
   microsoftProvider,
 } from "@/app/lib/firebase";
+import styles from "../admin.module.css";
 
 type SignInProvider = "microsoft" | "google";
 
@@ -23,7 +29,11 @@ const SIGN_IN_ERRORS: Record<string, string> = {
     "Your browser blocked the sign-in window. Allow pop-ups for this site and try again.",
   "auth/popup-closed-by-user": "Sign-in was cancelled.",
   "auth/unauthorized-domain":
-    "Admin sign-in is not available on this domain yet.",
+    "Admin sign-in is not available on this domain yet. Ask an administrator to add it to Firebase authorized domains.",
+  "auth/invalid-oauth-provider":
+    "Microsoft sign-in is not configured correctly. Please contact the site administrator.",
+  "auth/invalid-credential":
+    "Microsoft sign-in could not be completed. Please try again.",
   "auth/user-disabled": "This account cannot sign in. Please contact the site administrator.",
 };
 
@@ -68,13 +78,40 @@ export default function AdminSignInOptions() {
   const signingIn = signingInWith !== null;
 
   return (
-    <div className="mt-8 max-w-sm">
-      <div className="flex flex-col gap-3">
+    <div className={styles.loginForm}>
+      <div className={styles.providerGrid}>
+        {isFirebaseEmulatorEnabled ? (
+          <button
+            type="button"
+            disabled={signingIn}
+            onClick={async () => {
+              if (signingIn) return;
+              setSigningInWith("google");
+              setMessage("");
+              try {
+                await signInWithEmailAndPassword(
+                  auth,
+                  "admin@tufffinds.local",
+                  "sample-admin-123",
+                );
+              } catch (error) {
+                console.error("Sample admin sign in failed", error);
+                setMessage(getSafeSignInError(error));
+              } finally {
+                setSigningInWith(null);
+              }
+            }}
+            className={styles.primaryButton}
+          >
+            {signingIn ? "Signing in…" : "Use sample admin"}
+          </button>
+        ) : null}
+
         <button
           type="button"
           disabled={signingIn}
           onClick={() => signIn("microsoft", microsoftProvider)}
-          className="w-full rounded-full bg-[#40342F] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#40342F]/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className={styles.primaryButton}
         >
           {signingInWith === "microsoft"
             ? "Signing in with Microsoft…"
@@ -85,7 +122,7 @@ export default function AdminSignInOptions() {
           type="button"
           disabled={signingIn}
           onClick={() => signIn("google", googleProvider)}
-          className="w-full rounded-full border border-[#40342F] bg-transparent px-6 py-3 text-sm font-semibold text-[#40342F] transition hover:bg-[#40342F]/5 disabled:cursor-not-allowed disabled:opacity-60"
+          className={styles.secondaryButton}
         >
           {signingInWith === "google"
             ? "Signing in with Google…"
@@ -94,7 +131,7 @@ export default function AdminSignInOptions() {
       </div>
 
       {message ? (
-        <p className="mt-4 text-sm text-[#9F3A2A]" role="alert">
+        <p className={styles.errorText} role="alert">
           {message}
         </p>
       ) : null}

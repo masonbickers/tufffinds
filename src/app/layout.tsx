@@ -3,7 +3,19 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tufffinds.com";
+const defaultSiteUrl = "https://tufffinds.com";
+
+function resolveSiteUrl(value: string | undefined) {
+  if (!value) return defaultSiteUrl;
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return defaultSiteUrl;
+  }
+}
+
+const siteUrl = resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
 
 const geistSans = Geist({
   variable: "--font-sans",

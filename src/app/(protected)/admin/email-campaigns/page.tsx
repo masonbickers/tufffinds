@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { httpsCallable } from "firebase/functions";
 import { auth, functions } from "@/app/lib/firebase";
 import AdminShell from "../_components/AdminShell";
+import { AdminPage, AdminPageHeader } from "../_components/AdminUI";
 
 type TemplateName = "welcome" | "launch";
 type PreviewMode = "html" | "text";
@@ -157,22 +158,15 @@ export default function EmailCampaignsPage() {
 
   return (
     <AdminShell active="email-campaigns">
-      <div className="space-y-7">
-        <header>
-          <p className="text-[11px] uppercase tracking-[0.3em] text-black/40">
-            Email operations
-          </p>
-          <h1 className="mt-3 font-serif text-4xl text-[#241E1A]">
-            Email campaigns
-          </h1>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-black/60">
-            Review the exact customer emails, send controlled admin tests and
-            manage the protected one-time website launch campaign.
-          </p>
-        </header>
+      <AdminPage>
+        <AdminPageHeader
+          eyebrow="Email operations"
+          title="Email campaigns"
+          description="Preview customer emails, send controlled tests and manage the protected launch campaign."
+        />
 
         <div
-          className="grid gap-2 rounded-2xl border border-[#DED2C5] bg-[#FBF7F2] p-2 sm:grid-cols-2"
+          className="grid gap-1 rounded-[10px] border border-[#DED2C5] bg-[#f4f0ea] p-1 sm:grid-cols-2"
           role="tablist"
           aria-label="Email template"
         >
@@ -218,7 +212,7 @@ export default function EmailCampaignsPage() {
             ) : null}
           </>
         ) : null}
-      </div>
+      </AdminPage>
     </AdminShell>
   );
 }
@@ -239,9 +233,9 @@ function TemplateTab({
       aria-selected={active}
       onClick={onClick}
       className={[
-        "rounded-xl px-4 py-3 text-sm font-semibold transition",
+        "h-9 rounded-lg px-4 text-sm font-semibold transition",
         active
-          ? "bg-[#40342F] text-white shadow-sm"
+          ? "bg-[#40342F] text-white"
           : "text-[#5B493D] hover:bg-white",
       ].join(" ")}
     >
@@ -260,7 +254,7 @@ function TemplatePreview({
   const [mode, setMode] = useState<PreviewMode>("html");
 
   return (
-    <section className="rounded-[24px] border border-[#DED2C5] bg-[#FCFAF6] p-5 sm:p-6">
+    <section className="rounded-[14px] border border-[#DED2C5] bg-[#FCFAF6] p-4 sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/40">
@@ -387,7 +381,7 @@ function TestEmailPanel({ template }: { template: TemplateName }) {
   }
 
   return (
-    <section className="rounded-[24px] border border-[#DED2C5] bg-white p-5 sm:p-6">
+    <section className="rounded-[14px] border border-[#DED2C5] bg-white p-4 sm:p-5">
       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/40">
         Test email
       </p>
@@ -438,7 +432,7 @@ function TestEmailPanel({ template }: { template: TemplateName }) {
 
 function WelcomeDeliveryNote() {
   return (
-    <section className="rounded-[24px] border border-[#D5C4B3] bg-[#F7F1EA] p-5 sm:p-6">
+    <section className="rounded-[12px] border border-[#D5C4B3] bg-[#F7F1EA] p-4 sm:p-5">
       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7A5D46]">
         Automatic delivery
       </p>
@@ -583,7 +577,7 @@ function LaunchCampaignPanel({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[24px] border border-[#DED2C5] bg-white p-5 sm:p-6">
+      <section className="rounded-[14px] border border-[#DED2C5] bg-white p-4 sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/40">
@@ -621,7 +615,7 @@ function LaunchCampaignPanel({
         statusError={statusError}
       />
 
-      <section className="rounded-[24px] border border-[#C8A99A] bg-[#FFF8F4] p-5 sm:p-6">
+      <section className="rounded-[12px] border border-[#C8A99A] bg-[#FFF8F4] p-4 sm:p-5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9F3A2A]">
           Production launch campaign
         </p>
@@ -634,7 +628,7 @@ function LaunchCampaignPanel({
           be started after a campaign record exists.
         </p>
 
-        <div className="mt-5 rounded-2xl border border-[#E3CFC4] bg-white p-4">
+        <div className="mt-5 border-l-2 border-[#9F3A2A] bg-white px-4 py-3">
           <p className="text-xs font-semibold text-[#241E1A]">
             Type exactly: {LAUNCH_CONFIRMATION}
           </p>
@@ -660,7 +654,7 @@ function LaunchCampaignPanel({
         </div>
 
         {showFinalConfirmation ? (
-          <div className="mt-4 rounded-2xl border-2 border-[#9F3A2A] bg-white p-5">
+          <div className="mt-4 rounded-[10px] border-2 border-[#9F3A2A] bg-white p-4">
             <p className="font-semibold text-[#9F3A2A]">
               Final confirmation
             </p>
@@ -702,7 +696,7 @@ function LaunchCampaignPanel({
       </section>
 
       {canRetry ? (
-        <section className="rounded-[24px] border border-[#DED2C5] bg-[#FBF7F2] p-5 sm:p-6">
+        <section className="rounded-[12px] border border-[#DED2C5] bg-[#FBF7F2] p-4 sm:p-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/40">
             Failed recipients only
           </p>
@@ -761,11 +755,11 @@ function AuditGrid({ counts }: { counts: AuditCounts }) {
   ] as const;
 
   return (
-    <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="mt-5 grid border-y border-[#E7DCCF] sm:grid-cols-2 xl:grid-cols-3">
       {items.map(([label, value]) => (
         <div
           key={label}
-          className="rounded-2xl border border-[#E7DCCF] bg-[#FBF7F2] p-4"
+          className="border-b border-[#E7DCCF] px-4 py-3 sm:border-r"
         >
           <p className="text-[10px] uppercase tracking-[0.2em] text-black/40">
             {label}
@@ -798,7 +792,7 @@ function CampaignProgress({
   );
 
   return (
-    <section className="rounded-[24px] border border-[#DED2C5] bg-[#FCFAF6] p-5 sm:p-6">
+    <section className="rounded-[14px] border border-[#DED2C5] bg-[#FCFAF6] p-4 sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/40">
@@ -816,9 +810,9 @@ function CampaignProgress({
           Refresh
         </button>
       </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="mt-5 grid border-y border-[#E7DCCF] sm:grid-cols-2 xl:grid-cols-5">
         {progress.map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-[#E7DCCF] bg-white p-4">
+          <div key={label} className="border-b border-[#E7DCCF] px-4 py-3 xl:border-r">
             <p className="text-[9px] uppercase tracking-[0.2em] text-black/40">
               {label}
             </p>

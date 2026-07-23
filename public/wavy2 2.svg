@@ -1,0 +1,29 @@
+<!-- public/wavy.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="pink" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#f06cab" stop-opacity="0"/>
+      <stop offset=".08" stop-color="#f06cab" stop-opacity="1"/>
+      <stop offset=".92" stop-color="#f06cab" stop-opacity="1"/>
+      <stop offset="1"   stop-color="#f06cab" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-400%" width="140%" height="900%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+  </defs>
+
+  <!-- glow (thicker, blurred) -->
+  <path d="M0 60
+           Q 40 0, 80 60  T 160 60  T 240 60  T 320 60  T 400 60
+           T 480 60  T 560 60  T 640 60  T 720 60  T 800 60
+           T 880 60  T 960 60  T 1040 60 T 1120 60 T 1200 60"
+        fill="none" stroke="url(#pink)" stroke-width="12"
+        stroke-linecap="round" filter="url(#soft)"/>
+
+  <!-- main line -->
+<path d="M0 60 Q 40 2, 80 60 T 160 60 T 240 60 T 320 60 T 400 60
+                 T 480 60 T 560 60 T 640 60 T 720 60 T 800 60
+                 T 880 60 T 960 60 T 1040 60 T 1120 60 T 1200 60"
+      fill="none" stroke="url(#pink)" stroke-width="6" stroke-linecap="round"/>
+    
+</svg>

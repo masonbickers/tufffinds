@@ -1,7 +1,12 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import {
+  connectAuthEmulator,
+  getAuth,
+  GoogleAuthProvider,
+  OAuthProvider,
+} from "firebase/auth";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
 
 const requiredFirebaseEnv = {
@@ -57,8 +62,30 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app, "europe-west2");
+export const isFirebaseEmulatorEnabled =
+  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true";
+
+const emulatorConnectionState = globalThis as typeof globalThis & {
+  __tufffindsFirebaseEmulatorsConnected?: boolean;
+};
+
+if (
+  typeof window !== "undefined" &&
+  isFirebaseEmulatorEnabled &&
+  !emulatorConnectionState.__tufffindsFirebaseEmulatorsConnected
+) {
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", {
+    disableWarnings: true,
+  });
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
+  emulatorConnectionState.__tufffindsFirebaseEmulatorsConnected = true;
+}
+
 export const googleProvider = new GoogleAuthProvider();
 export const microsoftProvider = new OAuthProvider("microsoft.com");
+microsoftProvider.addScope("email");
+microsoftProvider.addScope("profile");
 
 microsoftProvider.setCustomParameters({
   prompt: "select_account",

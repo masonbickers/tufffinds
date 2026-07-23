@@ -1,0 +1,6 @@
+<!-- /public/section-break.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="10" viewBox="0 0 320 10" fill="none">
+  <!-- uses currentColor so you can tint it with CSS -->
+  <path d="M0 5 C20 1, 40 9, 60 5 S100 1, 120 5 160 9, 180 5 220 1, 240 5 280 9, 300 5 320 5"
+        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+</svg>

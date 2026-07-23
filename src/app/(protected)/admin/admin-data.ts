@@ -185,86 +185,6 @@ export type AdminEdit = {
   versions: EditVersion[];
 };
 
-export type OrderStatus =
-  | "awaiting-payment"
-  | "paid"
-  | "sourcing"
-  | "ordered"
-  | "partially-shipped"
-  | "shipped"
-  | "delivered"
-  | "completed"
-  | "returned"
-  | "refunded";
-
-export type OrderPaymentStatus = "awaiting-payment" | "paid" | "refunded" | "failed";
-export type OrderFulfillmentStatus =
-  | "pending"
-  | "sourcing"
-  | "ordered"
-  | "partially-shipped"
-  | "shipped"
-  | "delivered"
-  | "completed"
-  | "returned";
-
-export type OrderLineItem = {
-  id: string;
-  imageUri?: string;
-  priceLabel: string;
-  quantityLabel: string;
-  retailer: string;
-  subtitle?: string;
-  title: string;
-};
-
-export type ShipmentTrackingEntry = {
-  id: string;
-  label: string;
-  meta?: string;
-  description?: string;
-};
-
-export type OrderDocumentLink = {
-  href?: string;
-  id: string;
-  label: string;
-  summary: string;
-};
-
-export type OrderLinkedRecord = {
-  description: string;
-  href: string;
-  label: string;
-};
-
-export type AdminOrder = {
-  clientId: string;
-  feesLabel: string;
-  fulfillmentStatus: OrderFulfillmentStatus;
-  fulfillmentStatusLabel: string;
-  id: string;
-  invoiceActions: OrderDocumentLink[];
-  lineItems: OrderLineItem[];
-  linkedApprovedEdit: OrderLinkedRecord;
-  linkedRequest: OrderLinkedRecord;
-  paymentStatus: OrderPaymentStatus;
-  paymentStatusLabel: string;
-  reorderAvailable: boolean;
-  requestId: string;
-  requestTitle: string;
-  shipmentTracking: ShipmentTrackingEntry[];
-  shippingTotalLabel: string;
-  status: OrderStatus;
-  statusTimeline: ActivityEvent[];
-  subtotalLabel: string;
-  supportThread: OrderLinkedRecord;
-  totalLabel: string;
-  updatedAt: string;
-  updatedDateLabel: string;
-  whatHappensNext: string;
-};
-
 export type MessageActorType = "client" | "stylist" | "system";
 
 export type ThreadLifecycleLink = {
@@ -355,7 +275,6 @@ export type AdminSeedData = {
   billing: Record<string, BillingOverview>;
   clients: AdminClient[];
   edits: AdminEdit[];
-  orders: AdminOrder[];
   requests: AdminRequest[];
   threads: AdminThread[];
 };
@@ -364,7 +283,6 @@ export const adminSeed: AdminSeedData = {
   clients: [],
   requests: [],
   edits: [],
-  orders: [],
   threads: [],
   billing: {},
 };

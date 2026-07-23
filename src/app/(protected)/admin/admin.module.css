@@ -1,238 +1,163 @@
 .loginShell {
+  isolation: isolate;
   position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  padding: 48px 24px;
-  background: #f3ebe0;
-  color: #241e1a;
-}
-
-.loginGlowTop {
-  position: absolute;
-  inset: 0;
+  padding: 24px 18px;
   background:
-    radial-gradient(circle at top, #fff6ee 0%, transparent 34%),
-    radial-gradient(circle at bottom left, #ead8c3 0%, transparent 32%);
-}
-
-.loginGlowCenter {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 32rem;
-  height: 32rem;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
-  filter: blur(48px);
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.9), transparent 38%),
+    #f3efe9;
+  color: #41342e;
 }
 
 .loginWrap {
   position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
+  text-align: center;
 }
 
 .logoWrap {
-  display: flex;
-  justify-content: center;
+  position: relative;
+  width: clamp(190px, 28vw, 270px);
+  aspect-ratio: 23 / 5;
+  margin: 0 auto 22px;
 }
 
 .logo {
-  width: min(220px, 100%);
-  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.loginPanel {
+  padding: 4px 0;
 }
 
 .loginCopy {
-  margin-top: 24px;
   text-align: center;
 }
 
 .eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.34em;
+  margin: 0 0 8px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(36, 30, 26, 0.45);
+  color: rgba(65, 52, 46, 0.58);
 }
 
 .title {
-  margin-top: 14px;
+  max-width: 340px;
+  margin: 0 auto;
   font-family: var(--font-serif), Georgia, serif;
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
-  line-height: 0.98;
-  letter-spacing: -0.04em;
+  font-size: 1.65rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: #41342e;
 }
 
 .description {
-  max-width: 340px;
-  margin: 16px auto 0;
-  font-size: 14px;
-  line-height: 1.9;
-  color: rgba(36, 30, 26, 0.62);
+  max-width: 310px;
+  margin: 9px auto 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(65, 52, 46, 0.62);
 }
 
 .loginForm {
-  margin-top: 28px;
+  margin: 20px auto 0;
+  width: 100%;
+  max-width: 500px;
 }
 
-.authSwitch {
+.providerGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 18px;
-  padding: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.46);
-  border: 1px solid rgba(36, 30, 26, 0.08);
+  grid-template-columns: 1fr;
+  gap: 9px;
 }
 
-.authSwitchButton {
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  padding: 12px 14px;
+.primaryButton,
+.secondaryButton {
+  min-height: 40px;
+  border-radius: 10px;
+  padding: 10px 14px;
   font: inherit;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(36, 30, 26, 0.55);
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
 }
 
-.authSwitchButtonActive {
-  background: #241e1a;
+.primaryButton {
+  border: 1px solid #41342e;
+  background: #41342e;
   color: #fff;
 }
 
-.fieldsPanel {
-  padding: 0;
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #bfb8b3;
+  background: #f8f7f3;
+  color: #41342e;
 }
 
-.fieldGroup + .fieldGroup {
-  margin-top: 14px;
-}
-
-.fieldLabel {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: rgba(36, 30, 26, 0.48);
-}
-
-.fieldInput {
-  display: block;
-  width: 100%;
-  border: 1px solid rgba(36, 30, 26, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  padding: 16px 20px;
-  font: inherit;
-  font-size: 14px;
-  color: #241e1a;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  backdrop-filter: blur(10px);
-}
-
-.fieldInput::placeholder {
-  color: rgba(36, 30, 26, 0.3);
-}
-
-.fieldInput:focus {
-  border-color: rgba(36, 30, 26, 0.3);
-  background: rgba(255, 255, 255, 0.92);
-}
-
-.submitButton {
-  display: block;
-  width: 100%;
+.helperText ~ .secondaryButton,
+.errorText ~ .secondaryButton {
   margin-top: 18px;
-  border: 0;
-  border-radius: 999px;
-  background: #241e1a;
-  padding: 16px 20px;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: #fff;
-  cursor: pointer;
-  transition: opacity 160ms ease, transform 160ms ease, background-color 160ms ease;
 }
 
-.bypassButton {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  border: 1px solid rgba(36, 30, 26, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
-  padding: 16px 20px;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: #241e1a;
-  cursor: pointer;
-  transition: background-color 160ms ease, transform 160ms ease, border-color 160ms ease;
+.primaryButton:hover,
+.secondaryButton:hover {
+  opacity: 0.88;
 }
 
-.bypassButton:hover {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(36, 30, 26, 0.2);
-  transform: translateY(-1px);
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 2px solid #41342e;
+  outline-offset: 3px;
 }
 
-.submitButton:hover {
-  background: #000;
-  transform: translateY(-1px);
-}
-
-.submitButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.errorText {
-  margin-top: 14px;
-  text-align: center;
-  font-size: 14px;
-  color: #9f3a2a;
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .helperText {
-  margin-top: 12px;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(36, 30, 26, 0.52);
+  margin: 16px auto 0;
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(65, 52, 46, 0.68);
+}
+
+.errorText {
+  margin: 14px auto 0;
+  max-width: 440px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #8f3e2e;
 }
 
 .loginFooter {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(36, 30, 26, 0.35);
+  margin-top: 16px;
+  font-size: 9px;
+  color: rgba(65, 52, 46, 0.58);
 }
 
 @media (max-width: 640px) {
   .loginShell {
-    padding: 24px 16px;
+    padding: 20px 14px;
   }
 
-  .loginWrap {
-    max-width: 100%;
+  .logoWrap {
+    width: min(58vw, 240px);
   }
+
 }
