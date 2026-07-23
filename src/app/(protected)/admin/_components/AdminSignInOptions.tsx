@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  getRedirectResult,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
   type AuthProvider,
 } from "firebase/auth";
 import {
@@ -25,9 +26,6 @@ const SIGN_IN_ERRORS: Record<string, string> = {
     "The sign-in service could not be reached. Check your connection and try again.",
   "auth/operation-not-allowed":
     "This sign-in option is not available yet. Please contact the site administrator.",
-  "auth/popup-blocked":
-    "Your browser blocked the sign-in window. Allow pop-ups for this site and try again.",
-  "auth/popup-closed-by-user": "Sign-in was cancelled.",
   "auth/unauthorized-domain":
     "Admin sign-in is not available on this domain yet. Ask an administrator to add it to Firebase authorized domains.",
   "auth/invalid-oauth-provider":
@@ -56,6 +54,14 @@ export default function AdminSignInOptions() {
   );
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    void getRedirectResult(auth).catch((error: unknown) => {
+      console.error("Admin sign in redirect failed", error);
+      setMessage(getSafeSignInError(error));
+      setSigningInWith(null);
+    });
+  }, []);
+
   const signIn = async (
     providerName: SignInProvider,
     provider: AuthProvider,
@@ -66,11 +72,10 @@ export default function AdminSignInOptions() {
     setMessage("");
 
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Admin sign in failed", error);
       setMessage(getSafeSignInError(error));
-    } finally {
       setSigningInWith(null);
     }
   };
